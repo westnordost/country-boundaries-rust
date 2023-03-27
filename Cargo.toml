@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 description = "A fast offline reverse country geocoder"
 authors = ["Tobias Zwick"]
+license = "Apache-2.0"
 repository = "https://github.com/westnordost/country-boundaries-rust/"
 categories = ["internationalization"]
 keywords = ["geocoding", "openstreetmap"]
