@@ -8,14 +8,10 @@
 //!
 //! ```
 //! # use std::collections::HashSet;
-//! # use std::fs::File;
-//! # use std::io::BufReader;
 //! # use country_boundaries::{BoundingBox, CountryBoundaries, LatLon};
-//! # use std::error::Error;
-//! # use std::fs;
 //! #
-//! # fn main() -> Result<(), Box<dyn Error>> {
-//! let buf = fs::read("./data/boundaries360x180.ser")?.as_slice();
+//! # fn main() -> Result<(), Box<dyn std::error::Error>> {
+//! let buf = std::fs::read("./data/boundaries360x180.ser")?.as_slice();
 //! let boundaries = CountryBoundaries::from_reader(buf)?;
 //!
 //! // get country id(s) for Dallas¹
@@ -127,7 +123,7 @@ impl CountryBoundaries {
     /// # use country_boundaries::{CountryBoundaries, LatLon};
     /// #
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// # let buf = std::io::BufReader::new(std::fs::File::open("./data/boundaries360x180.ser")?);
+    /// # let buf = std::fs::read("./data/boundaries360x180.ser")?.as_slice();
     /// # let boundaries = CountryBoundaries::from_reader(buf)?;
     /// assert!(
     ///     boundaries.is_in(LatLon::new(47.6973, 8.6910)?, "DE")
@@ -147,7 +143,7 @@ impl CountryBoundaries {
     /// # use std::collections::HashSet;
     /// #
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// # let buf = std::io::BufReader::new(std::fs::File::open("./data/boundaries360x180.ser")?);
+    /// # let buf = std::fs::read("./data/boundaries360x180.ser")?.as_slice();
     /// # let boundaries = CountryBoundaries::from_reader(buf)?;
     /// // check if position is in any country where the first day of the workweek is Saturday. It is
     /// // more efficient than calling `is_in` for every id in a row.
@@ -173,7 +169,7 @@ impl CountryBoundaries {
     /// # use std::collections::HashSet;
     /// #
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// # let buf = std::io::BufReader::new(std::fs::File::open("./data/boundaries360x180.ser")?);
+    /// # let buf = std::fs::read("./data/boundaries360x180.ser")?.as_slice();
     /// # let boundaries = CountryBoundaries::from_reader(buf)?;
     /// assert_eq!(
     ///     vec!["US-TX", "US"],
@@ -204,7 +200,7 @@ impl CountryBoundaries {
     /// # use std::collections::HashSet;
     /// #
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// # let buf = std::io::BufReader::new(std::fs::File::open("./data/boundaries360x180.ser")?);
+    /// # let buf = std::fs::read("./data/boundaries360x180.ser")?.as_slice();
     /// # let boundaries = CountryBoundaries::from_reader(buf)?;
     /// assert_eq!(
     ///     HashSet::from(["RU-CHU", "RU"]),
@@ -239,7 +235,7 @@ impl CountryBoundaries {
     /// # use std::collections::HashSet;
     /// #
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// # let buf = std::io::BufReader::new(std::fs::File::open("./data/boundaries360x180.ser")?);
+    /// # let buf = std::fs::read("./data/boundaries360x180.ser")?.as_slice();
     /// # let boundaries = CountryBoundaries::from_reader(buf)?;
     /// assert_eq!(
     ///     HashSet::from(["RU-CHU", "RU", "US-AK", "US"]),
