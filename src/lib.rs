@@ -86,6 +86,8 @@
 //!
 //! See the source file for details (you can open it in [JOSM](https://josm.openstreetmap.de/)).
 
+// TODO versioning: start with 1.0.0?
+
 use std::{cmp::min, collections::HashMap, collections::HashSet, io, vec::Vec};
 use cell::Cell;
 use crate::deserializer::from_reader;
