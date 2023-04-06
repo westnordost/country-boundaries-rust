@@ -77,6 +77,10 @@ impl Cell {
 mod tests {
     use super::*;
 
+    fn latlon(latitude: f64, longitude: f64) -> LatLon {
+        LatLon::new(latitude, longitude).unwrap()
+    }
+
     #[test]
     fn get_definite_ids() {
         assert_eq!(
@@ -84,7 +88,7 @@ mod tests {
             Cell { 
                 containing_ids: vec![String::from("A"), String::from("C")],
                 intersecting_areas: vec![]
-            }.get_ids(&LatLon::new(0.0, 0.0))
+            }.get_ids(&latlon(0.0, 0.0))
         );
     }
 
@@ -92,7 +96,7 @@ mod tests {
     fn get_in_geometry_ids() {
         assert_eq!(
             vec!["B"],
-            Cell { containing_ids: vec![], intersecting_areas: vec![b()] }.get_ids(&LatLon::new(1.0, 1.0))
+            Cell { containing_ids: vec![], intersecting_areas: vec![b()] }.get_ids(&latlon(1.0, 1.0))
         )
     }
 
@@ -100,7 +104,7 @@ mod tests {
     fn dont_get_out_of_geometry_ids() {
         assert!(
             Cell { containing_ids: vec![], intersecting_areas: vec![b()] }
-                .get_ids(&LatLon::new(4.0, 4.0))
+                .get_ids(&latlon(4.0, 4.0))
                 .is_empty()
         )
     }
@@ -112,7 +116,7 @@ mod tests {
             Cell {
                 containing_ids: vec![String::from("A")],
                 intersecting_areas: vec![b()]
-            }.get_ids(&LatLon::new(1.0, 1.0))
+            }.get_ids(&latlon(1.0, 1.0))
         );
     }
 
@@ -133,7 +137,7 @@ mod tests {
             Cell {
                 containing_ids: vec![String::from("A")],
                 intersecting_areas: vec![]
-            }.is_in_any(&LatLon::new(0.0,0.0), &HashSet::from(["B", "A"]))
+            }.is_in_any(&latlon(0.0,0.0), &HashSet::from(["B", "A"]))
         );
     }
 
@@ -143,7 +147,7 @@ mod tests {
             Cell {
                 containing_ids: vec![String::from("A")],
                 intersecting_areas: vec![]
-            }.is_in_any(&LatLon::new(0.0,0.0), &HashSet::from(["B"]))
+            }.is_in_any(&latlon(0.0,0.0), &HashSet::from(["B"]))
         );
     }
 
@@ -153,7 +157,7 @@ mod tests {
             Cell {
                 containing_ids: vec![],
                 intersecting_areas: vec![b()]
-            }.is_in_any(&LatLon::new(1.0,1.0), &HashSet::from(["B"]))
+            }.is_in_any(&latlon(1.0,1.0), &HashSet::from(["B"]))
         );
     }
 
@@ -163,7 +167,7 @@ mod tests {
             Cell {
                 containing_ids: vec![],
                 intersecting_areas: vec![b()]
-            }.is_in_any(&LatLon::new(4.0,4.0), &HashSet::from(["B"]))
+            }.is_in_any(&latlon(4.0,4.0), &HashSet::from(["B"]))
         );
     }
 
@@ -175,6 +179,6 @@ mod tests {
     }
 
     fn p(longitude: i32, latitude: i32) -> Point {
-        Point::new(&LatLon::new(latitude as f64, longitude as f64))
+        Point::new(&latlon(latitude as f64, longitude as f64))
     }
 }

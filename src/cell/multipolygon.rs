@@ -112,6 +112,6 @@ mod tests {
     }
 
     fn p(longitude: i32, latitude: i32) -> Point {
-        Point::new(&LatLon::new(latitude as f64, longitude as f64))
+        Point::new(&LatLon::new(latitude as f64, longitude as f64).unwrap())
     }
 }

@@ -1,4 +1,4 @@
-use std::fmt;
+use crate::error::Error;
 
 #[derive(Debug, Copy, Clone)]
 pub struct LatLon {
@@ -10,23 +10,25 @@ impl LatLon {
     pub fn latitude(&self) -> f64 { self.latitude }
     pub fn longitude(&self) -> f64 { self.longitude }
 
-    /// Creates a new `LatLon`.
+    /// Creates a new `LatLon` or an error if `latitude` or `longitude` are invalid:
     ///
-    /// # Panics
-    /// Panics if the `latitude` is not between -90.0 and +90.0 or any is not finite (NaN, Infinite)
-    pub fn new(latitude: f64, longitude: f64) -> LatLon {
+    /// - `latitude` must be between -90.0 and +90.0
+    /// - all parameters must be finite (NaN, Infinite)
+    pub fn new(latitude: f64, longitude: f64) -> Result<LatLon, Error> {
         if !(-90.0..=90.0).contains(&latitude) {
-            panic!("latitude {latitude} is out of bounds, must be within -90.0 and +90.0");
+            return Err(Error::new(format!(
+                "latitude {latitude} is out of bounds, must be within -90.0 and +90.0"
+            )))
         }
         if !longitude.is_finite() {
-            panic!("longitude {longitude} must be finite");
+            return Err(Error::new(format!("longitude {longitude} must be finite")))
         }
-        LatLon { latitude, longitude }
+        Ok(LatLon { latitude, longitude })
     }
 }
 
-impl fmt::Display for LatLon {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl std::fmt::Display for LatLon {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}, {}", self.latitude, self.longitude)
     }
 }
@@ -36,43 +38,26 @@ mod tests {
     use super::*;
 
     #[test]
-    #[should_panic]
-    fn latitude_smaller_than_minus_90_panics() { LatLon::new(-90.0001, 0.0); }
+    fn return_errors() {
+        assert!(LatLon::new(-90.0001, 0.0).is_err());
+        assert!(LatLon::new( 90.0001, 0.0).is_err());
 
-    #[test]
-    #[should_panic]
-    fn latitude_greater_than_plus_90_panics() { LatLon::new(90.0001, 0.0); }
+        assert!(LatLon::new(f64::NAN, 0.0).is_err());
+        assert!(LatLon::new(0.0, f64::NAN).is_err());
 
-    #[test]
-    fn longitude_can_be_anything() {
-        LatLon::new(0.0, 0.0);
-        LatLon::new(0.0, 180.1);
-        LatLon::new(0.0, 999999.0);
-        LatLon::new(0.0, -180.1);
-        LatLon::new(0.0, -99999.0);
+        assert!(LatLon::new(f64::INFINITY, 0.0).is_err());
+        assert!(LatLon::new(0.0, f64::INFINITY).is_err());
+
+        assert!(LatLon::new(f64::NEG_INFINITY, 0.0).is_err());
+        assert!(LatLon::new(0.0, f64::NEG_INFINITY).is_err());
     }
 
     #[test]
-    #[should_panic]
-    fn latitude_is_nan_panics() { LatLon::new(f64::NAN, 0.0); }
-
-    #[test]
-    #[should_panic]
-    fn latitude_is_infinite_panics() { LatLon::new(f64::INFINITY, 0.0); }
-
-    #[test]
-    #[should_panic]
-    fn latitude_is_neg_infinite_panics() { LatLon::new(f64::NEG_INFINITY, 0.0); }
-
-    #[test]
-    #[should_panic]
-    fn longitude_is_nan_panics() { LatLon::new(0.0, f64::NAN); }
-
-    #[test]
-    #[should_panic]
-    fn longitude_is_infinite_panics() { LatLon::new(0.0, f64::INFINITY); }
-
-    #[test]
-    #[should_panic]
-    fn longitude_is_neg_infinite_panics() { LatLon::new(0.0, f64::NEG_INFINITY); }
+    fn longitude_can_be_anything() {
+        assert!(LatLon::new(0.0, 0.0).is_ok());
+        assert!(LatLon::new(0.0, 180.1).is_ok());
+        assert!(LatLon::new(0.0, 999999.0).is_ok());
+        assert!(LatLon::new(0.0, -180.1).is_ok());
+        assert!(LatLon::new(0.0, -99999.0).is_ok());
+    }
 }

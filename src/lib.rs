@@ -12,27 +12,28 @@
 //! # use std::io::BufReader;
 //! # use country_boundaries::{BoundingBox, CountryBoundaries, LatLon};
 //! # use std::error::Error;
+//! # use std::fs;
 //! #
 //! # fn main() -> Result<(), Box<dyn Error>> {
-//! let buf = BufReader::new(File::open("../data/boundaries360x180.ser")?);
-//! let boundaries = CountryBoundaries::from(buf)?;
+//! let buf = fs::read("./data/boundaries360x180.ser")?.as_slice();
+//! let boundaries = CountryBoundaries::from_reader(buf)?;
 //!
 //! // get country id(s) for Dallas¹
 //! assert_eq!(
 //!     vec!["US-TX", "US"],
-//!     boundaries.ids(LatLon::new(33.0, -97.0))
+//!     boundaries.ids(LatLon::new(33.0, -97.0)?)
 //! );
 //!
 //! // check that German exclave in Switzerland² is in Germany
 //! assert!(
-//!     boundaries.is_in(LatLon::new(47.6973, 8.6910), "DE")
+//!     boundaries.is_in(LatLon::new(47.6973, 8.6910)?, "DE")
 //! );
 //!
 //! // check if position is in any country where the first day of the workweek is Saturday. It is
 //! // more efficient than calling `is_in` for every id in a row.
 //! assert!(
 //!     boundaries.is_in_any(
-//!         LatLon::new(21.0, 96.0),
+//!         LatLon::new(21.0, 96.0)?,
 //!         &HashSet::from(["BD", "DJ", "IR", "PS"])
 //!     )
 //! );
@@ -40,16 +41,16 @@
 //! // get which country ids can be found within a bounding box around the Vaalserberg³
 //! assert_eq!(
 //!     HashSet::from(["DE", "BE", "NL"]),
-//!     boundaries.intersecting_ids(BoundingBox::new(50.7679, 5.9865, 50.7358, 6.0599))
+//!     boundaries.intersecting_ids(BoundingBox::new(50.7679, 5.9865, 50.7358, 6.0599)?)
 //! );
 //!
 //! // get which country ids completely cover a bounding box around the Vaalserberg³
 //! assert_eq!(
 //!     HashSet::new(),
-//!     boundaries.containing_ids(BoundingBox::new(50.7679, 5.9865, 50.7358, 6.0599))
+//!     boundaries.containing_ids(BoundingBox::new(50.7679, 5.9865, 50.7358, 6.0599)?)
 //! );
 //! #
-//! # OK(())
+//! # Ok(())
 //! # }
 //! ```
 //! ¹ [Dallas](https://www.openstreetmap.org?mlat=32.7816&mlon=-96.7954) —
@@ -91,7 +92,7 @@
 
 use std::{cmp::min, collections::HashMap, collections::HashSet, io, vec::Vec};
 use cell::Cell;
-// TODO use crate::deserializer::deserialize_from_bytes;
+use crate::deserializer::from_reader;
 
 pub use self::latlon::LatLon;
 pub use self::bbox::BoundingBox;
@@ -99,8 +100,8 @@ pub use self::bbox::BoundingBox;
 mod latlon;
 mod bbox;
 mod cell;
-
-// TODO mod deserializer;
+mod deserializer;
+mod error;
 
 #[derive(Debug)]
 pub struct CountryBoundaries {
@@ -114,11 +115,10 @@ pub struct CountryBoundaries {
 
 impl CountryBoundaries {
 
-    // TODO
     /// Create a CountryBoundaries from a stream of bytes.
-    //pub fn from(data: impl Iterator<Item=u8>) -> io::Result<CountryBoundaries> {
-    //    deserialize_from_bytes(data)
-    //}
+    pub fn from_reader(reader: impl io::Read) -> io::Result<CountryBoundaries> {
+        from_reader(reader)
+    }
 
     /// Returns whether the given `position` is in the region with the given `id`
     ///
@@ -127,12 +127,12 @@ impl CountryBoundaries {
     /// # use country_boundaries::{CountryBoundaries, LatLon};
     /// #
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// # let buf = std::io::BufReader::new(std::fs::File::open("../data/boundaries360x180.ser")?);
-    /// # let boundaries = CountryBoundaries::from(buf)?;
+    /// # let buf = std::io::BufReader::new(std::fs::File::open("./data/boundaries360x180.ser")?);
+    /// # let boundaries = CountryBoundaries::from_reader(buf)?;
     /// assert!(
-    ///     boundaries.is_in(LatLon::new(47.6973, 8.6910), "DE")
+    ///     boundaries.is_in(LatLon::new(47.6973, 8.6910)?, "DE")
     /// );
-    /// # OK(())
+    /// # Ok(())
     /// # }
     /// ```
     pub fn is_in(&self, position: LatLon, id: &str) -> bool {
@@ -147,17 +147,17 @@ impl CountryBoundaries {
     /// # use std::collections::HashSet;
     /// #
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// # let buf = std::io::BufReader::new(std::fs::File::open("../data/boundaries360x180.ser")?);
-    /// # let boundaries = CountryBoundaries::from(buf)?;
+    /// # let buf = std::io::BufReader::new(std::fs::File::open("./data/boundaries360x180.ser")?);
+    /// # let boundaries = CountryBoundaries::from_reader(buf)?;
     /// // check if position is in any country where the first day of the workweek is Saturday. It is
     /// // more efficient than calling `is_in` for every id in a row.
     /// assert!(
     ///     boundaries.is_in_any(
-    ///         LatLon::new(21.0, 96.0),
+    ///         LatLon::new(21.0, 96.0)?,
     ///         &HashSet::from(["BD", "DJ", "IR", "PS"])
     ///     )
     /// );
-    /// # OK(())
+    /// # Ok(())
     /// # }
     /// ```
     pub fn is_in_any(&self, position: LatLon, ids: &HashSet<&str>) -> bool {
@@ -173,13 +173,13 @@ impl CountryBoundaries {
     /// # use std::collections::HashSet;
     /// #
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// # let buf = std::io::BufReader::new(std::fs::File::open("../data/boundaries360x180.ser")?);
-    /// # let boundaries = CountryBoundaries::from(buf)?;
+    /// # let buf = std::io::BufReader::new(std::fs::File::open("./data/boundaries360x180.ser")?);
+    /// # let boundaries = CountryBoundaries::from_reader(buf)?;
     /// assert_eq!(
     ///     vec!["US-TX", "US"],
-    ///     boundaries.ids(LatLon::new(33.0, -97.0))
+    ///     boundaries.ids(LatLon::new(33.0, -97.0)?)
     /// );
-    /// # OK(())
+    /// # Ok(())
     /// # }
     /// ```
     pub fn ids(&self, position: LatLon) -> Vec<&str> {
@@ -204,13 +204,13 @@ impl CountryBoundaries {
     /// # use std::collections::HashSet;
     /// #
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// # let buf = std::io::BufReader::new(std::fs::File::open("../data/boundaries360x180.ser")?);
-    /// # let boundaries = CountryBoundaries::from(buf)?;
+    /// # let buf = std::io::BufReader::new(std::fs::File::open("./data/boundaries360x180.ser")?);
+    /// # let boundaries = CountryBoundaries::from_reader(buf)?;
     /// assert_eq!(
     ///     HashSet::from(["RU-CHU", "RU"]),
-    ///     boundaries.containing_ids(BoundingBox::new(66.0, 178.0, 68.0, -178.0))
+    ///     boundaries.containing_ids(BoundingBox::new(66.0, 178.0, 68.0, -178.0)?)
     /// );
-    /// # OK(())
+    /// # Ok(())
     /// # }
     /// ```
     pub fn containing_ids(&self, bounds: BoundingBox) -> HashSet<&str> {
@@ -239,13 +239,13 @@ impl CountryBoundaries {
     /// # use std::collections::HashSet;
     /// #
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// # let buf = std::io::BufReader::new(std::fs::File::open("../data/boundaries360x180.ser")?);
-    /// # let boundaries = CountryBoundaries::from(buf)?;
+    /// # let buf = std::io::BufReader::new(std::fs::File::open("./data/boundaries360x180.ser")?);
+    /// # let boundaries = CountryBoundaries::from_reader(buf)?;
     /// assert_eq!(
     ///     HashSet::from(["RU-CHU", "RU", "US-AK", "US"]),
-    ///     boundaries.intersecting_ids(BoundingBox::new(50.0, 163.0, 67.0, -150.0))
+    ///     boundaries.intersecting_ids(BoundingBox::new(50.0, 163.0, 67.0, -150.0)?)
     /// );
-    /// # OK(())
+    /// # Ok(())
     /// # }
     /// ```
     pub fn intersecting_ids(&self, bounds: BoundingBox) -> HashSet<&str> {
@@ -338,7 +338,7 @@ mod tests {
     use super::*;
 
     // just a convenience macro that constructs a cell
-    macro_rules! cell{
+    macro_rules! cell {
         ($containing_ids: expr) => {
             Cell {
                 containing_ids: $containing_ids.iter().map(|&s| String::from(s)).collect(),
@@ -351,6 +351,14 @@ mod tests {
                 intersecting_areas: $intersecting_areas
             }
         }
+    }
+
+    fn latlon(latitude: f64, longitude: f64) -> LatLon {
+        LatLon::new(latitude, longitude).unwrap()
+    }
+
+    fn bbox(min_latitude: f64, min_longitude: f64, max_latitude: f64, max_longitude: f64) -> BoundingBox {
+        BoundingBox::new(min_latitude, min_longitude, max_latitude, max_longitude).unwrap()
     }
 
     #[test]
@@ -367,27 +375,27 @@ mod tests {
             geometry_sizes: HashMap::new()
         };
 
-        assert_eq!(vec!["C"], boundaries.ids(LatLon::new(-90.0, -180.0)));
-        assert_eq!(vec!["C"], boundaries.ids(LatLon::new(-90.0, -90.0)));
-        assert_eq!(vec!["C"], boundaries.ids(LatLon::new(-45.0, -180.0)));
+        assert_eq!(vec!["C"], boundaries.ids(latlon(-90.0, -180.0)));
+        assert_eq!(vec!["C"], boundaries.ids(latlon(-90.0, -90.0)));
+        assert_eq!(vec!["C"], boundaries.ids(latlon(-45.0, -180.0)));
         // wrap around
-        assert_eq!(vec!["C"], boundaries.ids(LatLon::new(-45.0, 180.0)));
-        assert_eq!(vec!["C"], boundaries.ids(LatLon::new(-90.0, 180.0)));
+        assert_eq!(vec!["C"], boundaries.ids(latlon(-45.0, 180.0)));
+        assert_eq!(vec!["C"], boundaries.ids(latlon(-90.0, 180.0)));
 
-        assert_eq!(vec!["A"], boundaries.ids(LatLon::new(0.0, -180.0)));
-        assert_eq!(vec!["A"], boundaries.ids(LatLon::new(45.0, -180.0)));
-        assert_eq!(vec!["A"], boundaries.ids(LatLon::new(0.0, -90.0)));
+        assert_eq!(vec!["A"], boundaries.ids(latlon(0.0, -180.0)));
+        assert_eq!(vec!["A"], boundaries.ids(latlon(45.0, -180.0)));
+        assert_eq!(vec!["A"], boundaries.ids(latlon(0.0, -90.0)));
         // wrap around
-        assert_eq!(vec!["A"], boundaries.ids(LatLon::new(0.0, 180.0)));
-        assert_eq!(vec!["A"], boundaries.ids(LatLon::new(45.0, 180.0)));
+        assert_eq!(vec!["A"], boundaries.ids(latlon(0.0, 180.0)));
+        assert_eq!(vec!["A"], boundaries.ids(latlon(45.0, 180.0)));
 
-        assert_eq!(vec!["B"], boundaries.ids(LatLon::new(0.0, 0.0)));
-        assert_eq!(vec!["B"], boundaries.ids(LatLon::new(45.0, 0.0)));
-        assert_eq!(vec!["B"], boundaries.ids(LatLon::new(0.0, 90.0)));
+        assert_eq!(vec!["B"], boundaries.ids(latlon(0.0, 0.0)));
+        assert_eq!(vec!["B"], boundaries.ids(latlon(45.0, 0.0)));
+        assert_eq!(vec!["B"], boundaries.ids(latlon(0.0, 90.0)));
 
-        assert_eq!(vec!["D"], boundaries.ids(LatLon::new(-45.0, 0.0)));
-        assert_eq!(vec!["D"], boundaries.ids(LatLon::new(-90.0, 0.0)));
-        assert_eq!(vec!["D"], boundaries.ids(LatLon::new(-90.0, 90.0)));
+        assert_eq!(vec!["D"], boundaries.ids(latlon(-45.0, 0.0)));
+        assert_eq!(vec!["D"], boundaries.ids(latlon(-90.0, 0.0)));
+        assert_eq!(vec!["D"], boundaries.ids(latlon(-90.0, 90.0)));
     }
 
 
@@ -399,10 +407,10 @@ mod tests {
             geometry_sizes: HashMap::new()
         };
 
-        boundaries.ids(LatLon::new(-90.0, -180.0));
-        boundaries.ids(LatLon::new(90.0, 180.0));
-        boundaries.ids(LatLon::new(90.0, -180.0));
-        boundaries.ids(LatLon::new(-90.0, 180.0));
+        boundaries.ids(latlon(-90.0, -180.0));
+        boundaries.ids(latlon(90.0, 180.0));
+        boundaries.ids(latlon(90.0, -180.0));
+        boundaries.ids(latlon(-90.0, 180.0));
     }
 
     #[test]
@@ -417,7 +425,7 @@ mod tests {
                 (String::from("D"), 800.0),
             ])
         };
-        assert_eq!(vec!["A", "B", "C", "D"], boundaries.ids(LatLon::new(1.0, 1.0)));
+        assert_eq!(vec!["A", "B", "C", "D"], boundaries.ids(latlon(1.0, 1.0)));
     }
 
     #[test]
@@ -429,9 +437,7 @@ mod tests {
         };
         assert_eq!(
             HashSet::from(["A","B","C","D","E"]),
-            boundaries.intersecting_ids(
-                BoundingBox::new(-10.0,-10.0, 10.0,10.0)
-            )
+            boundaries.intersecting_ids(bbox(-10.0,-10.0, 10.0,10.0))
         )
     }
 
@@ -444,9 +450,7 @@ mod tests {
         };
         assert_eq!(
             HashSet::from(["A", "C"]),
-            boundaries.intersecting_ids(
-                BoundingBox::new(0.0, 170.0, 1.0, -170.0)
-            )
+            boundaries.intersecting_ids(bbox(0.0, 170.0, 1.0, -170.0))
         )
     }
 
@@ -459,9 +463,7 @@ mod tests {
         };
         assert_eq!(
             HashSet::from(["A", "B"]),
-            boundaries.containing_ids(
-                BoundingBox::new(0.0, 170.0, 1.0, -170.0)
-            )
+            boundaries.containing_ids(bbox(0.0, 170.0, 1.0, -170.0))
         )
     }
 
@@ -473,9 +475,7 @@ mod tests {
             raster_width: 2,
             geometry_sizes: HashMap::new()
         };
-        assert!(boundaries.containing_ids(
-            BoundingBox::new(-10.0, -10.0, 10.0, 10.0)
-        ).is_empty())
+        assert!(boundaries.containing_ids(bbox(-10.0, -10.0, 10.0, 10.0)).is_empty())
     }
 
     #[test]
@@ -492,9 +492,7 @@ mod tests {
         };
         assert_eq!(
             HashSet::from(["A"]),
-            boundaries.containing_ids(
-                BoundingBox::new(-10.0, -10.0, 10.0, 10.0)
-            )
+            boundaries.containing_ids(bbox(-10.0, -10.0, 10.0, 10.0))
         )
     }
 
@@ -507,9 +505,7 @@ mod tests {
         };
 
         assert!(
-            boundaries.containing_ids(
-                BoundingBox::new(-10.0, -10.0, 10.0, 10.0)
-            ).is_empty()
+            boundaries.containing_ids(bbox(-10.0, -10.0, 10.0, 10.0)).is_empty()
         )
     }
 }
