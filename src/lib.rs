@@ -92,6 +92,7 @@ use crate::deserializer::from_reader;
 
 pub use self::latlon::LatLon;
 pub use self::bbox::BoundingBox;
+pub use self::error::Error;
 
 mod latlon;
 mod bbox;
