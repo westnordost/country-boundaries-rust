@@ -103,7 +103,7 @@ mod cell;
 mod deserializer;
 mod error;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct CountryBoundaries {
     /// 2-dimensional array of cells
     raster: Vec<Cell>,

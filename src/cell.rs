@@ -6,7 +6,7 @@ use multipolygon::Multipolygon;
 pub mod multipolygon;
 pub mod point;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 /// One cell in the country boundaries grid
 pub struct Cell {
     /// Areas that completely cover this cell

@@ -1,6 +1,6 @@
 use crate::cell::point::Point;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Multipolygon {
     pub outer: Vec<Vec<Point>>,
     pub inner: Vec<Vec<Point>>
