@@ -87,13 +87,10 @@ fn read_point(reader: &mut impl Read) -> io::Result<Point> {
     Ok(Point { x, y })
 }
 
-fn read_usize8(reader: &mut impl Read) -> io::Result<usize> {
+fn read_u8(reader: &mut impl Read) -> io::Result<u8> {
     let mut buf = [0; 1];
     reader.read_exact(&mut buf)?;
-    match usize::try_from(u8::from_be_bytes(buf)) {
-        Ok(r) => Ok(r),
-        Err(e) => Err(io::Error::new(ErrorKind::Unsupported, e))
-    }
+    Ok(u8::from_be_bytes(buf))
 }
 
 fn read_u16(reader: &mut impl Read) -> io::Result<u16> {
@@ -102,22 +99,22 @@ fn read_u16(reader: &mut impl Read) -> io::Result<u16> {
     Ok(u16::from_be_bytes(buf))
 }
 
-fn read_usize16(reader: &mut impl Read) -> io::Result<usize> {
-    let mut buf = [0; 2];
+fn read_u32(reader: &mut impl Read) -> io::Result<u32> {
+    let mut buf = [0; 4];
     reader.read_exact(&mut buf)?;
-    match usize::try_from(u16::from_be_bytes(buf)) {
-        Ok(r) => Ok(r),
-        Err(e) => Err(io::Error::new(ErrorKind::Unsupported, e))
-    }
+    Ok(u32::from_be_bytes(buf))
+}
+
+fn read_usize8(reader: &mut impl Read) -> io::Result<usize> {
+    usize::try_from(read_u8(reader)?).map_err(|e| io::Error::new(ErrorKind::Unsupported, e))
+}
+
+fn read_usize16(reader: &mut impl Read) -> io::Result<usize> {
+    usize::try_from(read_u16(reader)?).map_err(|e| io::Error::new(ErrorKind::Unsupported, e))
 }
 
 fn read_usize32(reader: &mut impl Read) -> io::Result<usize> {
-    let mut buf = [0; 4];
-    reader.read_exact(&mut buf)?;
-    match usize::try_from(u32::from_be_bytes(buf)) {
-        Ok(r) => Ok(r),
-        Err(e) => Err(io::Error::new(ErrorKind::Unsupported, e))
-    }
+    usize::try_from(read_u32(reader)?).map_err(|e| io::Error::new(ErrorKind::Unsupported, e))
 }
 
 fn read_f64(reader: &mut impl Read) -> io::Result<f64> {
@@ -130,9 +127,5 @@ fn read_string(reader: &mut impl Read) -> io::Result<String> {
     let length = read_usize16(reader)?;
     let mut vec: Vec<u8> = vec![0; length];
     reader.read_exact(vec.as_mut_slice())?;
-    let result = String::from_utf8(vec);
-    return match result {
-        Ok(r) => Ok(r),
-        Err(e) => Err(io::Error::new(ErrorKind::InvalidData, e))
-    }
+    String::from_utf8(vec).map_err(|e| io::Error::new(ErrorKind::InvalidData, e))
 }
