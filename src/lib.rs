@@ -11,8 +11,8 @@
 //! # use country_boundaries::{BoundingBox, CountryBoundaries, LatLon};
 //! #
 //! # fn main() -> Result<(), Box<dyn std::error::Error>> {
-//! let buf = std::fs::read("./data/boundaries360x180.ser")?.as_slice();
-//! let boundaries = CountryBoundaries::from_reader(buf)?;
+//! let buf = std::fs::read("./data/boundaries360x180.ser")?;
+//! let boundaries = CountryBoundaries::from_reader(buf.as_slice())?;
 //!
 //! // get country id(s) for Dallas¹
 //! assert_eq!(
@@ -90,6 +90,7 @@
 
 use std::{cmp::min, collections::HashMap, collections::HashSet, io, vec::Vec};
 use cell::Cell;
+use crate::cell::point::Point;
 use crate::deserializer::from_reader;
 
 pub use self::latlon::LatLon;
@@ -126,8 +127,8 @@ impl CountryBoundaries {
     /// # use country_boundaries::{CountryBoundaries, LatLon};
     /// #
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// # let buf = std::fs::read("./data/boundaries360x180.ser")?.as_slice();
-    /// # let boundaries = CountryBoundaries::from_reader(buf)?;
+    /// # let buf = std::fs::read("./data/boundaries360x180.ser")?;
+    /// # let boundaries = CountryBoundaries::from_reader(buf.as_slice())?;
     /// assert!(
     ///     boundaries.is_in(LatLon::new(47.6973, 8.6910)?, "DE")
     /// );
@@ -135,7 +136,8 @@ impl CountryBoundaries {
     /// # }
     /// ```
     pub fn is_in(&self, position: LatLon, id: &str) -> bool {
-        self.cell(&position).is_in(&position, id)
+        let (cell, point)  = self.cell_and_local_point(position);
+        cell.is_in(point, id)
     }
 
     /// Returns whether the given `position` is in any of the regions with the given `ids`.
@@ -146,8 +148,8 @@ impl CountryBoundaries {
     /// # use std::collections::HashSet;
     /// #
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// # let buf = std::fs::read("./data/boundaries360x180.ser")?.as_slice();
-    /// # let boundaries = CountryBoundaries::from_reader(buf)?;
+    /// # let buf = std::fs::read("./data/boundaries360x180.ser")?;
+    /// # let boundaries = CountryBoundaries::from_reader(buf.as_slice())?;
     /// // check if position is in any country where the first day of the workweek is Saturday. It is
     /// // more efficient than calling `is_in` for every id in a row.
     /// assert!(
@@ -160,7 +162,8 @@ impl CountryBoundaries {
     /// # }
     /// ```
     pub fn is_in_any(&self, position: LatLon, ids: &HashSet<&str>) -> bool {
-        self.cell(&position).is_in_any(&position, ids)
+        let (cell, point)  = self.cell_and_local_point(position);
+        cell.is_in_any(point, ids)
     }
 
     /// Returns the ids of the regions the given `position` is contained in, ordered by size of
@@ -172,8 +175,8 @@ impl CountryBoundaries {
     /// # use std::collections::HashSet;
     /// #
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// # let buf = std::fs::read("./data/boundaries360x180.ser")?.as_slice();
-    /// # let boundaries = CountryBoundaries::from_reader(buf)?;
+    /// # let buf = std::fs::read("./data/boundaries360x180.ser")?;
+    /// # let boundaries = CountryBoundaries::from_reader(buf.as_slice())?;
     /// assert_eq!(
     ///     vec!["US-TX", "US"],
     ///     boundaries.ids(LatLon::new(33.0, -97.0)?)
@@ -182,7 +185,8 @@ impl CountryBoundaries {
     /// # }
     /// ```
     pub fn ids(&self, position: LatLon) -> Vec<&str> {
-        let mut result = self.cell(&position).get_ids(&position);
+        let (cell, point)  = self.cell_and_local_point(position);
+        let mut result = cell.get_ids(point);
         let zero = 0.0;
         result.sort_by(|&a, &b| {
             let a = if let Some(size) = self.geometry_sizes.get(a) { size } else { &zero };
@@ -203,8 +207,8 @@ impl CountryBoundaries {
     /// # use std::collections::HashSet;
     /// #
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// # let buf = std::fs::read("./data/boundaries360x180.ser")?.as_slice();
-    /// # let boundaries = CountryBoundaries::from_reader(buf)?;
+    /// # let buf = std::fs::read("./data/boundaries360x180.ser")?;
+    /// # let boundaries = CountryBoundaries::from_reader(buf.as_slice())?;
     /// assert_eq!(
     ///     HashSet::from(["RU-CHU", "RU"]),
     ///     boundaries.containing_ids(BoundingBox::new(66.0, 178.0, 68.0, -178.0)?)
@@ -238,8 +242,8 @@ impl CountryBoundaries {
     /// # use std::collections::HashSet;
     /// #
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// # let buf = std::fs::read("./data/boundaries360x180.ser")?.as_slice();
-    /// # let boundaries = CountryBoundaries::from_reader(buf)?;
+    /// # let buf = std::fs::read("./data/boundaries360x180.ser")?;
+    /// # let boundaries = CountryBoundaries::from_reader(buf.as_slice())?;
     /// assert_eq!(
     ///     HashSet::from(["RU-CHU", "RU", "US-AK", "US"]),
     ///     boundaries.intersecting_ids(BoundingBox::new(50.0, 163.0, 67.0, -150.0)?)
@@ -255,30 +259,58 @@ impl CountryBoundaries {
         ids
     }
 
-    fn cell(&self, position: &LatLon) -> &Cell {
-        let x = self.longitude_to_cell_x(position.longitude());
-        let y = self.latitude_to_cell_y(position.latitude());
+    fn cell_and_local_point(&self, position: LatLon) -> (&Cell, Point) {
+        let normalized_longitude = normalize(position.longitude(), -180.0, 360.0);
+        let cell_x = self.longitude_to_cell_x(normalized_longitude);
+        let cell_y = self.latitude_to_cell_y(position.latitude());
 
+        (
+            self.cell(cell_x, cell_y),
+            Point {
+                x: self.longitude_to_local_x(cell_x, normalized_longitude),
+                y: self.latitude_to_local_y(cell_y, position.latitude())
+            }
+        )
+    }
+
+    fn cell(&self, x: usize, y: usize) -> &Cell {
         &self.raster[y * self.raster_width + x]
     }
 
     fn longitude_to_cell_x(&self, longitude: f64) -> usize {
-        let normalized_longitude = normalize(longitude, -180.0, 360.0);
         min(
             self.raster_width.saturating_sub(1),
-            ((self.raster_width as f64) * (180.0 + normalized_longitude) / 360.0).floor() as usize
+            ((self.raster_width as f64) * (180.0 + longitude) / 360.0).floor() as usize
         )
     }
 
     fn latitude_to_cell_y(&self, latitude: f64) -> usize {
-        let raster_height = self.raster.len() / self.raster_width;
-        (((raster_height as f64) * (90.0 - latitude) / 180.0).ceil() as usize).saturating_sub(1)
+        let raster_height = self.raster.len() as f64 / self.raster_width as f64;
+        ((raster_height * (90.0 - latitude) / 180.0).ceil() as usize).saturating_sub(1)
+    }
+
+    fn longitude_to_local_x(&self, cell_x: usize, longitude: f64) -> u16 {
+        let raster_width = self.raster_width as f64;
+        let cell_x = cell_x as f64;
+        let cell_longitude = -180.0 + 360.0 * cell_x / raster_width;
+        ((longitude - cell_longitude) * 0xffff as f64 * 360.0 / raster_width).floor() as u16
+    }
+
+    fn latitude_to_local_y(&self, cell_y: usize, latitude: f64) -> u16 {
+        let raster_width = self.raster_width as f64;
+        let raster_height = self.raster.len() as f64 / raster_width;
+        let cell_y = cell_y as f64;
+        let cell_latitude = 90.0 - 180.0 * (cell_y + 1.0) / raster_height;
+        ((latitude - cell_latitude) * 0xffff as f64 * 180.0 / raster_height).floor() as u16
     }
 
     fn cells(&self, bounds: &BoundingBox) -> impl Iterator<Item = &Cell> {
-        let min_x = self.longitude_to_cell_x(bounds.min_longitude());
+        let normalized_min_longitude = normalize(bounds.min_longitude(), -180.0, 360.0);
+        let normalized_max_longitude = normalize(bounds.max_longitude(), -180.0, 360.0);
+
+        let min_x = self.longitude_to_cell_x(normalized_min_longitude);
         let max_y = self.latitude_to_cell_y(bounds.min_latitude());
-        let max_x = self.longitude_to_cell_x(bounds.max_longitude());
+        let max_x = self.longitude_to_cell_x(normalized_max_longitude);
         let min_y = self.latitude_to_cell_y(bounds.max_latitude());
 
         let steps_y = max_y - min_y;
