@@ -8,7 +8,7 @@ Find the area in which a geo position is located.
 It is a port of the [Java library of the same name](https://github.com/westnordost/countryboundaries/),
 has pretty much the same API and uses the same file format.
 
-# Example
+# Example usage
 
 ```rust
 use std::collections::HashSet;
@@ -92,7 +92,3 @@ requirements for OpenStreetMap editing:
   a few subdivisions of other countries.
 
 See the source file for details (you can open it in [JOSM](https://josm.openstreetmap.de/)).
-
-## Development
-* To run tests, use `cargo test`
-* To fmt/lint, use `cargo fmt` and `cargo clippy`

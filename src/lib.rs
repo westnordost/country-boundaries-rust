@@ -1,5 +1,6 @@
 // Use README.md in a documentation on github, crates.io, and docs site, as well as unit test the examples in it.
 #![doc = include_str!("../README.md")]
+
 // pedantic might be an overkill, but will catch more
 #![warn(clippy::pedantic)]
 // TODO: these should be reviewed
@@ -8,9 +9,6 @@
 #![allow(clippy::cast_precision_loss)]
 #![allow(clippy::cast_sign_loss)]
 #![allow(clippy::must_use_candidate)]
-
-// TODO versioning: start with 1.0.0?
-// SUGGESTION: no, start with 0.1.0 -- most crates start with that
 
 mod bbox;
 mod cell;
