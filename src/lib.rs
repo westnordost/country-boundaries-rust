@@ -1,6 +1,5 @@
 // Use README.md in a documentation on github, crates.io, and docs site, as well as unit test the examples in it.
 #![doc = include_str!("../README.md")]
-
 // pedantic might be an overkill, but will catch more
 #![warn(clippy::pedantic)]
 // TODO: these should be reviewed
