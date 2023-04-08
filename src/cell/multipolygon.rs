@@ -54,10 +54,10 @@ fn is_point_in_polygon(p: &Point, v: &[Point]) -> bool {
     wn != 0
 }
 
-fn is_left(p0: &Point, p1: &Point, p: &Point) -> i32 {
-    // must cast to i32 because otherwise there could be an integer overflow
-    (p1.x as i32 - p0.x as i32) * (p.y as i32 - p0.y as i32)
-    - (p.x as i32 - p0.x as i32) * (p1.y as i32 - p0.y as i32)
+fn is_left(p0: &Point, p1: &Point, p: &Point) -> i64 {
+    // must cast to 64 because otherwise there could be an integer overflow
+    (p1.x as i64 - p0.x as i64) * (p.y as i64 - p0.y as i64)
+    - (p.x as i64 - p0.x as i64) * (p1.y as i64 - p0.y as i64)
 }
 
 #[cfg(test)]
