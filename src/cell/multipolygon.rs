@@ -13,12 +13,12 @@ pub struct Multipolygon {
 impl Multipolygon {
     pub fn covers(&self, point: &Point) -> bool {
         let mut insides = 0;
-        for area in self.outer.iter() {
+        for area in &self.outer {
             if is_point_in_polygon(point, area.as_slice()) {
                 insides += 1;
             }
         }
-        for area in self.inner.iter() {
+        for area in &self.inner {
             if is_point_in_polygon(point, area.as_slice()) {
                 insides -= 1;
             }

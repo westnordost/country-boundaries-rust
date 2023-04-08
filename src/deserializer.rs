@@ -32,8 +32,11 @@ pub fn from_reader(mut reader: impl Read) -> io::Result<CountryBoundaries> {
         let size = read_f64(&mut reader)?;
         geometry_sizes.insert(id, size);
     }
+
     let raster_width = read_usize32(&mut reader)?;
+
     let raster_size = read_usize32(&mut reader)?;
+
     let mut raster = Vec::with_capacity(raster_size);
     for _ in 0..raster_size {
         raster.push(read_cell(&mut reader)?);
@@ -141,9 +144,9 @@ mod tests {
     #[test]
     fn read_float() {
         assert!(read_f64(&mut [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00].as_slice()).is_err());
-        
+
         assert_eq!(
-            12.5, 
+            12.5,
             read_f64(&mut [0x40, 0x29, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00].as_slice()).unwrap()
         );
     }
@@ -151,7 +154,7 @@ mod tests {
     #[test]
     fn test_read_u8() {
         assert!(read_u8(&mut [].as_slice()).is_err());
-        
+
         assert_eq!(17, read_u8(&mut [0x11].as_slice()).unwrap());
         assert_eq!(u8::MIN, read_u8(&mut [0x00].as_slice()).unwrap());
         assert_eq!(u8::MAX, read_u8(&mut [0xff].as_slice()).unwrap());
@@ -193,7 +196,7 @@ mod tests {
     #[test]
     fn test_read_point() {
         assert_eq!(
-            Point {x: 1, y: 2} ,
+            Point { x: 1, y: 2 } ,
             read_point(&mut [0x00, 0x01, 0x00, 0x02].as_slice()).unwrap()
         );
     }
@@ -201,7 +204,9 @@ mod tests {
     #[test]
     fn test_read_ring() {
         let empty = [0x00, 0x00, 0x00, 0x00];
-        for i in 0..empty.len() - 1 { assert!(read_ring(&mut &empty[0..i]).is_err()); }
+        for i in 0..empty.len() - 1 {
+            assert!(read_ring(&mut &empty[0..i]).is_err());
+        }
         assert!(read_ring(&mut empty.as_slice()).unwrap().is_empty());
 
         let two_points = [
@@ -211,9 +216,11 @@ mod tests {
             0x00, 0x03,             // p2.x
             0x00, 0x04              // p2.y
         ];
-        for i in 0..two_points.len() - 1 { assert!(read_ring(&mut &two_points[0..i]).is_err()); }
+        for i in 0..two_points.len() - 1 {
+            assert!(read_ring(&mut &two_points[0..i]).is_err());
+        }
         assert_eq!(
-            vec![Point {x: 1, y: 2}, Point {x: 3, y: 4}],
+            vec![Point { x: 1, y: 2 }, Point { x: 3, y: 4 }],
             read_ring(&mut two_points.as_slice()).unwrap()
         );
     }
@@ -231,9 +238,11 @@ mod tests {
             0x00, 0x03,             // p2.x
             0x00, 0x04              // p2.y
         ];
-        for i in 0..two_rings.len() - 1 { assert!(read_polygons(&mut &two_rings[0..i]).is_err()); }
+        for i in 0..two_rings.len() - 1 {
+            assert!(read_polygons(&mut &two_rings[0..i]).is_err());
+        }
         assert_eq!(
-            vec![vec![Point {x: 1, y: 2}], vec![Point {x: 3, y: 4}]],
+            vec![vec![Point { x: 1, y: 2 }], vec![Point { x: 3, y: 4 }]],
             read_polygons(&mut two_rings.as_slice()).unwrap()
         );
     }
@@ -244,7 +253,7 @@ mod tests {
             Cell { containing_ids: vec![], intersecting_areas: vec![] },
             read_cell(&mut [0x00, 0x00].as_slice()).unwrap()
         );
-        
+
         let cell = [
             0x01,             // containing ids length
             0x00, 0x01, 0x41, // "A"
@@ -252,9 +261,11 @@ mod tests {
             0x00, 0x01, 0x42, // "B"
             0x00, 0x00        // empty multipolygon
         ];
-        for i in 0..cell.len() - 1 { assert!(read_polygons(&mut &cell[0..i]).is_err()); }
+        for i in 0..cell.len() - 1 {
+            assert!(read_polygons(&mut &cell[0..i]).is_err());
+        }
         assert_eq!(
-            Cell { 
+            Cell {
                 containing_ids: vec![String::from("A")],
                 intersecting_areas: vec![
                     (String::from("B"), Multipolygon { inner: vec![], outer: vec![] })
@@ -283,7 +294,9 @@ mod tests {
             0x00, 0x00, 0x00, 0x00, // raster width
             0x00, 0x00, 0x00, 0x00, // raster size
         ];
-        for i in 0..minimum.len() - 1 { assert!(from_reader(&mut &minimum[0..i]).is_err()); }
+        for i in 0..minimum.len() - 1 {
+            assert!(from_reader(&mut &minimum[0..i]).is_err());
+        }
         assert_eq!(
             CountryBoundaries { raster: vec![], raster_width: 0, geometry_sizes: HashMap::new() },
             from_reader(&mut minimum.as_slice()).unwrap()
@@ -303,10 +316,12 @@ mod tests {
             0x00, 0x01, 0x41,                               // "A"
             0x00,                                           // intersecting areas length
         ];
-        for i in 0..basic.len() - 1 { assert!(from_reader(&mut &basic[0..i]).is_err()); }
+        for i in 0..basic.len() - 1 {
+            assert!(from_reader(&mut &basic[0..i]).is_err());
+        }
         assert_eq!(
-            CountryBoundaries { 
-                raster: vec![Cell { 
+            CountryBoundaries {
+                raster: vec![Cell {
                     containing_ids: vec![String::from("A")],
                     intersecting_areas: vec![]
                 }],

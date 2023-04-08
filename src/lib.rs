@@ -28,7 +28,10 @@ pub struct CountryBoundaries {
 
 impl CountryBoundaries {
 
-    /// Create a CountryBoundaries from a stream of bytes.
+    /// Create a `CountryBoundaries` from a stream of bytes.
+    ///
+    /// # Errors
+    /// Returns an error if the given data is not a valid country boundaries file.
     pub fn from_reader(reader: impl io::Read) -> io::Result<CountryBoundaries> {
         from_reader(reader)
     }
@@ -42,14 +45,12 @@ impl CountryBoundaries {
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// # let buf = std::fs::read("./data/boundaries360x180.ser")?;
     /// # let boundaries = CountryBoundaries::from_reader(buf.as_slice())?;
-    /// assert!(
-    ///     boundaries.is_in(LatLon::new(47.6973, 8.6910)?, "DE")
-    /// );
+    /// assert!(boundaries.is_in(LatLon::new(47.6973, 8.6910)?, "DE"));
     /// # Ok(())
     /// # }
     /// ```
     pub fn is_in(&self, position: LatLon, id: &str) -> bool {
-        let (cell, point)  = self.cell_and_local_point(position);
+        let (cell, point) = self.cell_and_local_point(position);
         cell.is_in(point, id)
     }
 
@@ -75,7 +76,7 @@ impl CountryBoundaries {
     /// # }
     /// ```
     pub fn is_in_any(&self, position: LatLon, ids: &HashSet<&str>) -> bool {
-        let (cell, point)  = self.cell_and_local_point(position);
+        let (cell, point) = self.cell_and_local_point(position);
         cell.is_in_any(point, ids)
     }
 
@@ -98,7 +99,7 @@ impl CountryBoundaries {
     /// # }
     /// ```
     pub fn ids(&self, position: LatLon) -> Vec<&str> {
-        let (cell, point)  = self.cell_and_local_point(position);
+        let (cell, point) = self.cell_and_local_point(position);
         let mut result = cell.get_ids(point);
         let zero = 0.0;
         result.sort_by(|&a, &b| {
@@ -110,7 +111,7 @@ impl CountryBoundaries {
     }
 
     /// Returns the ids of the regions that fully contain the given bounding box `bounds`.
-    /// 
+    ///
     /// The given bounding box is allowed to wrap around the 180th longitude,
     /// i.e `bounds.min_longitude` = 170 and `bounds.max_longitude` = -170 is fine.
     ///
@@ -134,10 +135,14 @@ impl CountryBoundaries {
         let mut first_cell = true;
         for cell in self.cells(&bounds) {
             if first_cell {
-                ids.extend(cell.containing_ids.iter().map(|id| id.as_str()));
+                ids.extend(cell.containing_ids.iter().map(String::as_str));
                 first_cell = false;
             } else {
-                ids.retain(|&id| cell.containing_ids.iter().any(|containing_id| containing_id == id));
+                ids.retain(|&id| {
+                    cell.containing_ids
+                        .iter()
+                        .any(|containing_id| containing_id == id)
+                });
                 if ids.is_empty() { return ids; }
             }
         }
@@ -145,9 +150,9 @@ impl CountryBoundaries {
     }
 
     /// Returns the ids of the regions that contain or at lest intersect with the given bounding box
-    /// `bounds`. 
-    /// 
-    /// The given bounding box is allowed to wrap around the 180th longitude, 
+    /// `bounds`.
+    ///
+    /// The given bounding box is allowed to wrap around the 180th longitude,
     /// i.e `bounds.min_longitude` = 170 and `bounds.max_longitude` = -170 is fine.
     ///
     /// # Example
@@ -229,7 +234,11 @@ impl CountryBoundaries {
 
         let steps_y = max_y - min_y;
         // might wrap around
-        let steps_x = if min_x > max_x { self.raster_width - min_x + max_x } else { max_x - min_x };
+        let steps_x = if min_x > max_x {
+            self.raster_width - min_x + max_x
+        } else {
+            max_x - min_x
+        };
 
         let mut x_step = 0;
         let mut y_step = 0;
@@ -239,7 +248,9 @@ impl CountryBoundaries {
                 let x = (min_x + x_step) % self.raster_width;
                 let y = min_y + y_step;
                 Some(self.cell(x, y))
-            } else { None };
+            } else {
+                None
+            };
             
             if y_step < steps_y {
                 y_step += 1;
@@ -250,7 +261,7 @@ impl CountryBoundaries {
 
             result
         })
-        /* 
+        /*
         // this would be more elegant and shorter, but it is still experimental
 
         return std::iter::from_generator(|| {
@@ -272,7 +283,7 @@ fn normalize(value: f64, start_at: f64, base: f64) -> f64 {
         value += base;
     } else if value >= start_at + base {
         value -= base;
-    } 
+    }
     value
 }
 
@@ -287,22 +298,27 @@ mod tests {
         ($containing_ids: expr) => {
             Cell {
                 containing_ids: $containing_ids.iter().map(|&s| String::from(s)).collect(),
-                intersecting_areas: vec![]
+                intersecting_areas: vec![],
             }
         };
         ($containing_ids: expr, $intersecting_areas: expr) => {
             Cell {
                 containing_ids: $containing_ids.iter().map(|&s| String::from(s)).collect(),
-                intersecting_areas: $intersecting_areas
+                intersecting_areas: $intersecting_areas,
             }
-        }
+        };
     }
 
     fn latlon(latitude: f64, longitude: f64) -> LatLon {
         LatLon::new(latitude, longitude).unwrap()
     }
 
-    fn bbox(min_latitude: f64, min_longitude: f64, max_latitude: f64, max_longitude: f64) -> BoundingBox {
+    fn bbox(
+        min_latitude: f64,
+        min_longitude: f64,
+        max_latitude: f64,
+        max_longitude: f64
+    ) -> BoundingBox {
         BoundingBox::new(min_latitude, min_longitude, max_latitude, max_longitude).unwrap()
     }
 
@@ -353,15 +369,15 @@ mod tests {
         };
 
         boundaries.ids(latlon(-90.0, -180.0));
-        boundaries.ids(latlon(90.0, 180.0));
-        boundaries.ids(latlon(90.0, -180.0));
-        boundaries.ids(latlon(-90.0, 180.0));
+        boundaries.ids(latlon( 90.0,  180.0));
+        boundaries.ids(latlon( 90.0, -180.0));
+        boundaries.ids(latlon(-90.0,  180.0));
     }
 
     #[test]
     fn get_containing_ids_sorted_by_size_ascending() {
         let boundaries = CountryBoundaries {
-            raster: vec![cell!(&["D","B","C","A"])],
+            raster: vec![cell!(&["D", "B", "C", "A"])],
             raster_width: 1,
             geometry_sizes: HashMap::from([
                 (String::from("A"), 10.0),
@@ -376,13 +392,13 @@ mod tests {
     #[test]
     fn get_intersecting_ids_in_bbox_is_merged_correctly() {
         let boundaries = CountryBoundaries {
-            raster: vec![cell!(&["A"]), cell!(&["B"]), cell!(&["C"]), cell!(&["D","E"])],
+            raster: vec![cell!(&["A"]), cell!(&["B"]), cell!(&["C"]), cell!(&["D", "E"])],
             raster_width: 2,
             geometry_sizes: HashMap::new()
         };
         assert_eq!(
-            HashSet::from(["A","B","C","D","E"]),
-            boundaries.intersecting_ids(bbox(-10.0,-10.0, 10.0,10.0))
+            HashSet::from(["A", "B", "C", "D", "E"]),
+            boundaries.intersecting_ids(bbox(-10.0, -10.0, 10.0, 10.0))
         )
     }
 
@@ -402,7 +418,7 @@ mod tests {
     #[test]
     fn get_containing_ids_in_bbox_wraps_longitude_correctly() {
         let boundaries = CountryBoundaries {
-            raster: vec![cell!(&["A", "B", "C"]),cell!(&["X"]),cell!(&["A", "B"])],
+            raster: vec![cell!(&["A", "B", "C"]), cell!(&["X"]), cell!(&["A", "B"])],
             raster_width: 3,
             geometry_sizes: HashMap::new()
         };
@@ -427,10 +443,10 @@ mod tests {
     fn get_containing_ids_in_bbox_is_merged_correctly() {
         let boundaries = CountryBoundaries {
             raster: vec![
-                cell!(&["A","B"]),
-                cell!(&["B","A"]),
-                cell!(&["C","B","A"]),
-                cell!(&["D","A"]),
+                cell!(&["A", "B"]),
+                cell!(&["B", "A"]),
+                cell!(&["C", "B", "A"]),
+                cell!(&["D", "A"]),
             ],
             raster_width: 2,
             geometry_sizes: HashMap::new()
@@ -449,8 +465,6 @@ mod tests {
             geometry_sizes: HashMap::new()
         };
 
-        assert!(
-            boundaries.containing_ids(bbox(-10.0, -10.0, 10.0, 10.0)).is_empty()
-        )
+        assert!(boundaries.containing_ids(bbox(-10.0, -10.0, 10.0, 10.0)).is_empty())
     }
 }
