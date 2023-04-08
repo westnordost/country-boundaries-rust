@@ -37,8 +37,6 @@ pub struct CountryBoundaries {
 
 impl CountryBoundaries {
     /// Create a `CountryBoundaries` from a stream of bytes.
-    /// # Errors
-    /// Returns an error if the given data is not a valid country boundaries file.
     ///
     /// # Errors
     /// Returns an error if the given data is not a valid country boundaries file.
