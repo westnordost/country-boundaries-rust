@@ -1,4 +1,13 @@
+// Use README.md in a documentation on github, crates.io, and docs site, as well as unit test the examples in it.
 #![doc = include_str!("../README.md")]
+// pedantic might be an overkill, but will catch more
+#![warn(clippy::pedantic)]
+// TODO: these should be reviewed
+#![allow(clippy::cast_lossless)]
+#![allow(clippy::cast_possible_truncation)]
+#![allow(clippy::cast_precision_loss)]
+#![allow(clippy::cast_sign_loss)]
+#![allow(clippy::must_use_candidate)]
 
 // TODO versioning: start with 1.0.0?
 // SUGGESTION: no, start with 0.1.0 -- most crates start with that
@@ -30,8 +39,10 @@ pub struct CountryBoundaries {
 }
 
 impl CountryBoundaries {
-    /// Create a CountryBoundaries from a stream of bytes.
-    pub fn from_reader(reader: impl io::Read) -> Result<CountryBoundaries, Error> {
+    /// Create a `CountryBoundaries` from a stream of bytes.
+    /// # Errors
+    /// Returns an error if the given data is not a valid country boundaries file.
+    pub fn from_reader(reader: impl io::Read) -> Result<Self, Error> {
         from_reader(reader)
     }
 
@@ -142,7 +153,7 @@ impl CountryBoundaries {
         let mut first_cell = true;
         for cell in self.cells(&bounds) {
             if first_cell {
-                ids.extend(cell.containing_ids.iter().map(|id| id.as_str()));
+                ids.extend(cell.containing_ids.iter().map(String::as_str));
                 first_cell = false;
             } else {
                 ids.retain(|&id| {

@@ -15,7 +15,7 @@ impl Cell {
         containing_ids: Vec<String>,
         intersecting_areas: Vec<(String, Multipolygon)>,
     ) -> Self {
-        Cell {
+        Self {
             containing_ids,
             intersecting_areas,
         }
@@ -27,7 +27,7 @@ impl Cell {
             || self
                 .intersecting_areas
                 .iter()
-                .any(|v| v.0 == id && v.1.covers(&point))
+                .any(|v| v.0 == id && v.1.covers(point))
     }
 
     /// Returns whether the given position is in any area with the given `ids`
@@ -36,16 +36,16 @@ impl Cell {
             || self
                 .intersecting_areas
                 .iter()
-                .any(|v| ids.contains(v.0.as_str()) && v.1.covers(&point))
+                .any(|v| ids.contains(v.0.as_str()) && v.1.covers(point))
     }
 
     /// Return all ids of areas that cover the given `position`
     pub fn get_ids(&self, point: Point) -> Vec<&str> {
         // FIXME: capacity should be containing_ids.len() + the count expected from the intersecting_areas
         let mut result: Vec<&str> = Vec::with_capacity(self.containing_ids.len());
-        result.extend(self.containing_ids.iter().map(|s| s.as_str()));
-        for country in self.intersecting_areas.iter() {
-            if country.1.covers(&point) {
+        result.extend(self.containing_ids.iter().map(String::as_str));
+        for country in &self.intersecting_areas {
+            if country.1.covers(point) {
                 result.push(country.0.as_str());
             }
         }
@@ -56,7 +56,7 @@ impl Cell {
     pub fn get_all_ids(&self) -> Vec<&str> {
         self.containing_ids
             .iter()
-            .map(|s| s.as_str())
+            .map(String::as_str)
             .chain(self.intersecting_areas.iter().map(|s| s.0.as_str()))
             .collect()
     }

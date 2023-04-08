@@ -11,14 +11,14 @@ pub struct Multipolygon {
 }
 
 impl Multipolygon {
-    pub fn covers(&self, point: &Point) -> bool {
+    pub fn covers(&self, point: Point) -> bool {
         let mut insides = 0;
-        for area in self.outer.iter() {
+        for area in &self.outer {
             if is_point_in_polygon(point, area.as_slice()) {
                 insides += 1;
             }
         }
-        for area in self.inner.iter() {
+        for area in &self.inner {
             if is_point_in_polygon(point, area.as_slice()) {
                 insides -= 1;
             }
@@ -36,17 +36,17 @@ impl Multipolygon {
 // Users of this code must verify correctness for their application.
 // http://geomalgorithms.com/a03-_inclusion.html
 
-fn is_point_in_polygon(p: &Point, v: &[Point]) -> bool {
+fn is_point_in_polygon(p: Point, v: &[Point]) -> bool {
     let mut wn = 0;
     let mut i = v.len() - 1;
     // FIXME: this is not the most efficient way to do this. Use this instead:
     //        for (j, val) in v.iter().enumerate() { if val.y <= p.y { ...
     for j in 0..v.len() {
         if v[i].y <= p.y {
-            if v[j].y > p.y && is_left(&v[i], &v[j], p) > 0 {
+            if v[j].y > p.y && is_left(v[i], v[j], p) > 0 {
                 wn += 1;
             }
-        } else if v[j].y <= p.y && is_left(&v[i], &v[j], p) < 0 {
+        } else if v[j].y <= p.y && is_left(v[i], v[j], p) < 0 {
             wn -= 1;
         }
         i = j;
@@ -54,7 +54,7 @@ fn is_point_in_polygon(p: &Point, v: &[Point]) -> bool {
     wn != 0
 }
 
-fn is_left(p0: &Point, p1: &Point, p: &Point) -> i64 {
+fn is_left(p0: Point, p1: Point, p: Point) -> i64 {
     // must cast to 64 because otherwise there could be an integer overflow
     (p1.x as i64 - p0.x as i64) * (p.y as i64 - p0.y as i64)
         - (p.x as i64 - p0.x as i64) * (p1.y as i64 - p0.y as i64)

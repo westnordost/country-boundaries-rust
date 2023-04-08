@@ -24,6 +24,7 @@ impl BoundingBox {
 
     /// Creates a new `BoundingBox` or an error if any of the parameters is invalid or out of range:
     ///
+    /// # Errors
     /// - `min_latitude` must be smaller or equal than `max_latitude`
     /// - `min_latitude` and `max_latitude` must be between -90.0 and +90.0
     /// - all parameters must be not finite (neither `NaN` nor `Infinite`)
@@ -32,7 +33,7 @@ impl BoundingBox {
         min_longitude: f64,
         max_latitude: f64,
         max_longitude: f64,
-    ) -> Result<BoundingBox, Error> {
+    ) -> Result<Self, Error> {
         if !(-90.0..=90.0).contains(&min_latitude) {
             return Err(Error::LatitudeOutOfBounds {
                 param: "min_latitude",
@@ -63,7 +64,7 @@ impl BoundingBox {
                 longitude: max_longitude,
             });
         }
-        Ok(BoundingBox {
+        Ok(Self {
             min_latitude,
             min_longitude,
             max_latitude,
