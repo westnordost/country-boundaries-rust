@@ -210,7 +210,7 @@ impl CountryBoundaries {
     /// # let buf = std::fs::read("./data/boundaries360x180.ser")?;
     /// # let boundaries = CountryBoundaries::from_reader(buf.as_slice())?;
     /// assert_eq!(
-    ///     HashSet::from(["RU-CHU", "RU"]),
+    ///     HashSet::from(["RU"]),
     ///     boundaries.containing_ids(BoundingBox::new(66.0, 178.0, 68.0, -178.0)?)
     /// );
     /// # Ok(())
@@ -246,7 +246,7 @@ impl CountryBoundaries {
     /// # let buf = std::fs::read("./data/boundaries360x180.ser")?;
     /// # let boundaries = CountryBoundaries::from_reader(buf.as_slice())?;
     /// assert_eq!(
-    ///     HashSet::from(["RU-CHU", "RU", "US-AK", "US"]),
+    ///     HashSet::from(["RU", "US-AK", "US"]),
     ///     boundaries.intersecting_ids(BoundingBox::new(50.0, 163.0, 67.0, -150.0)?)
     /// );
     /// # Ok(())
