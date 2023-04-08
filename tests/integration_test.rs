@@ -1,11 +1,12 @@
-use std::collections::HashSet;
-use std::fs;
 use country_boundaries::{self, BoundingBox, CountryBoundaries, LatLon};
+use std::collections::HashSet;
+use std::fs::File;
+use std::io::BufReader;
 
 #[test]
 fn return_correct_results_at_cell_edges() {
-    let buf = fs::read("./data/boundaries360x180.ser");
-    let boundaries = CountryBoundaries::from_reader(buf.unwrap().as_slice()).unwrap();
+    let buf = BufReader::new(File::open("./data/boundaries360x180.ser").unwrap());
+    let boundaries = CountryBoundaries::from_reader(buf).unwrap();
 
     // in clockwise order...
     assert_eq!(vec!["HR"], boundaries.ids(latlon(45.5, 16.0)));
@@ -21,9 +22,9 @@ fn return_correct_results_at_cell_edges() {
 
 #[test]
 fn containing_ids_at_180th_meridian() {
-    let buf = fs::read("./data/boundaries360x180.ser");
-    let boundaries = CountryBoundaries::from_reader(buf.unwrap().as_slice()).unwrap();
-    
+    let buf = BufReader::new(File::open("./data/boundaries360x180.ser").unwrap());
+    let boundaries = CountryBoundaries::from_reader(buf).unwrap();
+
     assert_eq!(
         HashSet::from(["RU"]),
         boundaries.containing_ids(BoundingBox::new(66.0, 178.0, 68.0, -178.0).unwrap())

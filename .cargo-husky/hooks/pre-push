@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# See https://github.com/rhysd/cargo-husky#readme
+#
+
+set -e
+
+echo "+Run CI steps"
+
+rustc --version
+cargo --version
+cargo fmt --all -- --check
+cargo clippy -- -D warnings
+cargo build
+
+echo "TESTS ARE DISABLED!!!  PLEASE RE-ENABLE THEM IN .cargo-husky/hooks/pre-push"
+
+# cargo test
+# cargo test --doc

@@ -3,12 +3,16 @@ use crate::error::Error;
 #[derive(Debug, Copy, Clone)]
 pub struct LatLon {
     latitude: f64,
-    longitude: f64
+    longitude: f64,
 }
 
 impl LatLon {
-    pub fn latitude(&self) -> f64 { self.latitude }
-    pub fn longitude(&self) -> f64 { self.longitude }
+    pub fn latitude(&self) -> f64 {
+        self.latitude
+    }
+    pub fn longitude(&self) -> f64 {
+        self.longitude
+    }
 
     /// Creates a new `LatLon` or an error if `latitude` or `longitude` are invalid:
     ///
@@ -16,14 +20,21 @@ impl LatLon {
     /// - all parameters must be finite (NaN, Infinite)
     pub fn new(latitude: f64, longitude: f64) -> Result<LatLon, Error> {
         if !(-90.0..=90.0).contains(&latitude) {
-            return Err(Error::new(format!(
-                "latitude {latitude} is out of bounds, must be within -90.0 and +90.0"
-            )))
+            return Err(Error::LatitudeOutOfBounds {
+                param: "latitude",
+                latitude,
+            });
         }
         if !longitude.is_finite() {
-            return Err(Error::new(format!("longitude {longitude} must be finite")))
+            return Err(Error::LongitudeNotFinite {
+                param: "longitude",
+                longitude,
+            });
         }
-        Ok(LatLon { latitude, longitude })
+        Ok(LatLon {
+            latitude,
+            longitude,
+        })
     }
 }
 
@@ -40,7 +51,7 @@ mod tests {
     #[test]
     fn return_errors() {
         assert!(LatLon::new(-90.0001, 0.0).is_err());
-        assert!(LatLon::new( 90.0001, 0.0).is_err());
+        assert!(LatLon::new(90.0001, 0.0).is_err());
 
         assert!(LatLon::new(f64::NAN, 0.0).is_err());
         assert!(LatLon::new(0.0, f64::NAN).is_err());
