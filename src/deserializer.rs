@@ -32,6 +32,7 @@ pub fn from_reader(mut reader: impl Read) -> MyResult<CountryBoundaries> {
     let raster_width = read_usize32(&mut reader)?;
 
     let raster_size = read_usize32(&mut reader)?;
+
     let mut raster = Vec::with_capacity(raster_size);
     for _ in 0..raster_size {
         raster.push(read_cell(&mut reader)?);

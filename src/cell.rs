@@ -23,33 +23,30 @@ impl Cell {
 
     /// Returns whether the given `position` is in the area with the given `id`
     pub fn is_in(&self, point: Point, id: &str) -> bool {
-        self.containing_ids.iter().any(|v| v == id)
-            || self
-                .intersecting_areas
-                .iter()
-                .any(|v| v.0 == id && v.1.covers(point))
+        self.containing_ids.iter().any(|cid| cid == id)
+        ||
+        self.intersecting_areas.iter().any(|a| a.0 == id && a.1.covers(point))
     }
 
     /// Returns whether the given position is in any area with the given `ids`
     pub fn is_in_any(&self, point: Point, ids: &HashSet<&str>) -> bool {
-        self.containing_ids.iter().any(|v| ids.contains(v.as_str()))
-            || self
-                .intersecting_areas
-                .iter()
-                .any(|v| ids.contains(v.0.as_str()) && v.1.covers(point))
+        self.containing_ids
+            .iter()
+            .any(|containing_id| ids.contains(containing_id.as_str()))
+        ||
+        self.intersecting_areas
+            .iter()
+            .any(|a| ids.contains(a.0.as_str()) && a.1.covers(point))
     }
 
-    /// Return all ids of areas that cover the given `position`
+    /// Return all ids of areas that cover the given `position` (in no particular order)
     pub fn get_ids(&self, point: Point) -> Vec<&str> {
-        // FIXME: capacity should be containing_ids.len() + the count expected from the intersecting_areas
-        let mut result: Vec<&str> = Vec::with_capacity(self.containing_ids.len());
-        result.extend(self.containing_ids.iter().map(String::as_str));
-        for country in &self.intersecting_areas {
-            if country.1.covers(point) {
-                result.push(country.0.as_str());
-            }
-        }
-        result
+        self.intersecting_areas
+            .iter()
+            .filter(|a| a.1.covers(point))
+            .map(|a| a.0.as_str())
+            .chain(self.containing_ids.iter().map(String::as_str))
+            .collect()
     }
 
     /// Return all ids of areas that completely cover or partly cover this cell
@@ -57,7 +54,7 @@ impl Cell {
         self.containing_ids
             .iter()
             .map(String::as_str)
-            .chain(self.intersecting_areas.iter().map(|s| s.0.as_str()))
+            .chain(self.intersecting_areas.iter().map(|a| a.0.as_str()))
             .collect()
     }
 }
@@ -92,7 +89,7 @@ mod tests {
     #[test]
     fn get_definite_and_in_geometry_ids() {
         assert_eq!(
-            vec!["A", "B"],
+            vec!["B", "A"],
             Cell::new(vec![s("A")], vec![b()]).get_ids(p(1, 1))
         );
     }

@@ -39,6 +39,9 @@ impl CountryBoundaries {
     /// Create a `CountryBoundaries` from a stream of bytes.
     /// # Errors
     /// Returns an error if the given data is not a valid country boundaries file.
+    ///
+    /// # Errors
+    /// Returns an error if the given data is not a valid country boundaries file.
     pub fn from_reader(reader: impl io::Read) -> Result<Self, Error> {
         from_reader(reader)
     }
@@ -268,7 +271,6 @@ impl CountryBoundaries {
             } else {
                 None
             };
-
             if y_step < steps_y {
                 y_step += 1;
             } else {
@@ -385,9 +387,9 @@ mod tests {
         };
 
         boundaries.ids(latlon(-90.0, -180.0));
-        boundaries.ids(latlon(90.0, 180.0));
-        boundaries.ids(latlon(90.0, -180.0));
-        boundaries.ids(latlon(-90.0, 180.0));
+        boundaries.ids(latlon( 90.0,  180.0));
+        boundaries.ids(latlon( 90.0, -180.0));
+        boundaries.ids(latlon(-90.0,  180.0));
     }
 
     #[test]
