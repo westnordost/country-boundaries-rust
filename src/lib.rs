@@ -9,6 +9,7 @@ use crate::deserializer::from_reader;
 pub use self::latlon::LatLon;
 pub use self::bbox::BoundingBox;
 pub use self::error::Error;
+pub use self::deserializer::ReadError;
 
 mod latlon;
 mod bbox;
@@ -33,7 +34,7 @@ impl CountryBoundaries {
     ///
     /// # Errors
     /// Returns an error if the given data is not a valid country boundaries file.
-    pub fn from_reader(reader: impl io::Read) -> Result<Self, Error> {
+    pub fn from_reader(reader: impl io::Read) -> Result<Self, ReadError> {
         from_reader(reader)
     }
 
