@@ -27,29 +27,34 @@ impl BoundingBox {
         max_longitude: f64
     ) -> Result<Self, Error> {
         if !(-90.0..=90.0).contains(&min_latitude) {
-            return Err(Error::new(format!(
-                "min_latitude {min_latitude} is out of bounds, must be within -90.0 and +90.0"
-            )))
+            return Err(Error::LatitudeOutOfBounds {
+                param: "min_latitude",
+                latitude: min_latitude
+            });
         }
         if !(-90.0..=90.0).contains(&max_latitude) {
-            return Err(Error::new(format!(
-                "max_latitude {max_latitude} is out of bounds, must be within -90.0 and +90.0"
-            )))
+            return Err(Error::LatitudeOutOfBounds {
+                param: "max_latitude",
+                latitude: max_latitude,
+            });
         }
         if min_latitude > max_latitude {
-            return Err(Error::new(format!(
-                "min_latitude {min_latitude} must be smaller or equal than max_latitude {max_latitude}"
-            )))
+            return Err(Error::MinLatitudeGreaterThanMaxLatitude {
+                min_latitude,
+                max_latitude,
+            });
         }
         if !min_longitude.is_finite() {
-            return Err(Error::new(format!(
-                "min_longitude {min_longitude} must be finite"
-            )))
+            return Err(Error::LongitudeNotFinite {
+                param: "min_longitude",
+                longitude: min_longitude,
+            });
         }
         if !max_longitude.is_finite() {
-            return Err(Error::new(format!(
-                "max_longitude {max_longitude} must be finite"
-            )))
+            return Err(Error::LongitudeNotFinite {
+                param: "max_longitude",
+                longitude: max_longitude,
+            });
         }
         Ok(Self { min_latitude, min_longitude, max_latitude, max_longitude })
     }

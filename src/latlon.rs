@@ -17,12 +17,16 @@ impl LatLon {
     /// - all parameters must be finite (NaN, Infinite)
     pub fn new(latitude: f64, longitude: f64) -> Result<Self, Error> {
         if !(-90.0..=90.0).contains(&latitude) {
-            return Err(Error::new(format!(
-                "latitude {latitude} is out of bounds, must be within -90.0 and +90.0"
-            )))
+            return Err(Error::LatitudeOutOfBounds {
+                param: "latitude",
+                latitude
+            });
         }
         if !longitude.is_finite() {
-            return Err(Error::new(format!("longitude {longitude} must be finite")))
+            return Err(Error::LongitudeNotFinite {
+                param: "longitude",
+                longitude
+            });
         }
         Ok(Self { latitude, longitude })
     }

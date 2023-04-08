@@ -6,6 +6,8 @@ use crate::multipolygon::Multipolygon;
 use crate::multipolygon::Point;
 use crate::{CountryBoundaries, Error};
 
+type MyResult<T> = Result<T, Error>;
+
 /// Deserialize a `CountryBoundaries` from an IO stream.
 ///
 /// The content of the IO stream is deserialized directly from the stream without being buffered in
@@ -14,15 +16,13 @@ use crate::{CountryBoundaries, Error};
 /// When reading from a source against which short reads are not efficient, such as a [`File`],
 /// you will want to apply your own buffering because this function will not buffer the input. See
 /// [`io::BufReader`].
-pub fn from_reader(mut reader: impl Read) -> io::Result<CountryBoundaries> {
+pub fn from_reader(mut reader: impl Read) -> MyResult<CountryBoundaries> {
     let version = read_u16(&mut reader)?;
     if version != 2 {
-        return Err(io::Error::new(ErrorKind::InvalidData,
-            Error::new(format!(
-                "Wrong version number '{}' of the boundaries file (expected: '2').\
-                 You may need to get the current version of the data.", version
-            ))
-        ))
+        return Err(Error::WrongVersionNumber {
+            expected: 2,
+            actual: version,
+        });
     }
 
     let geometry_sizes_count = read_usize32(&mut reader)?;
@@ -45,7 +45,7 @@ pub fn from_reader(mut reader: impl Read) -> io::Result<CountryBoundaries> {
     Ok(CountryBoundaries { raster, raster_width, geometry_sizes })
 }
 
-fn read_cell(reader: &mut impl Read) -> io::Result<Cell> {
+fn read_cell(reader: &mut impl Read) -> MyResult<Cell> {
     let containing_ids_size = usize::from(read_u8(reader)?);
     let mut containing_ids = Vec::with_capacity(containing_ids_size);
     for _ in 0..containing_ids_size {
@@ -59,14 +59,14 @@ fn read_cell(reader: &mut impl Read) -> io::Result<Cell> {
     Ok(Cell { containing_ids, intersecting_areas })
 }
 
-fn read_areas(reader: &mut impl Read) -> io::Result<(String, Multipolygon)> {
+fn read_areas(reader: &mut impl Read) -> MyResult<(String, Multipolygon)> {
     let id = read_string(reader)?;
     let outer = read_polygons(reader)?;
     let inner = read_polygons(reader)?;
     Ok((id, Multipolygon { outer, inner }))
 }
 
-fn read_polygons(reader: &mut impl Read) -> io::Result<Vec<Vec<Point>>> {
+fn read_polygons(reader: &mut impl Read) -> MyResult<Vec<Vec<Point>>> {
     let size = usize::from(read_u8(reader)?);
     let mut polygons: Vec<Vec<Point>> = Vec::with_capacity(size);
     for _ in 0..size {
@@ -75,7 +75,7 @@ fn read_polygons(reader: &mut impl Read) -> io::Result<Vec<Vec<Point>>> {
     Ok(polygons)
 }
 
-fn read_ring(reader: &mut impl Read) -> io::Result<Vec<Point>> {
+fn read_ring(reader: &mut impl Read) -> MyResult<Vec<Point>> {
     let size = read_usize32(reader)?;
     let mut ring = Vec::with_capacity(size);
     for _ in 0..size {
@@ -84,45 +84,45 @@ fn read_ring(reader: &mut impl Read) -> io::Result<Vec<Point>> {
     Ok(ring)
 }
 
-fn read_point(reader: &mut impl Read) -> io::Result<Point> {
+fn read_point(reader: &mut impl Read) -> MyResult<Point> {
     let x = read_u16(reader)?;
     let y = read_u16(reader)?;
     Ok(Point { x, y })
 }
 
-fn read_u8(reader: &mut impl Read) -> io::Result<u8> {
+fn read_u8(reader: &mut impl Read) -> MyResult<u8> {
     let mut buf = [0; 1];
     reader.read_exact(&mut buf)?;
     Ok(u8::from_be_bytes(buf))
 }
 
-fn read_u16(reader: &mut impl Read) -> io::Result<u16> {
+fn read_u16(reader: &mut impl Read) -> MyResult<u16> {
     let mut buf = [0; 2];
     reader.read_exact(&mut buf)?;
     Ok(u16::from_be_bytes(buf))
 }
 
-fn read_u32(reader: &mut impl Read) -> io::Result<u32> {
+fn read_u32(reader: &mut impl Read) -> MyResult<u32> {
     let mut buf = [0; 4];
     reader.read_exact(&mut buf)?;
     Ok(u32::from_be_bytes(buf))
 }
 
-fn read_usize32(reader: &mut impl Read) -> io::Result<usize> {
-    usize::try_from(read_u32(reader)?).map_err(|e| io::Error::new(ErrorKind::Unsupported, e))
+fn read_usize32(reader: &mut impl Read) -> MyResult<usize> {
+    Ok(usize::try_from(read_u32(reader)?)?)
 }
 
-fn read_f64(reader: &mut impl Read) -> io::Result<f64> {
+fn read_f64(reader: &mut impl Read) -> MyResult<f64> {
     let mut buf = [0; 8];
     reader.read_exact(&mut buf)?;
     Ok(f64::from_be_bytes(buf))
 }
 
-fn read_string(reader: &mut impl Read) -> io::Result<String> {
+fn read_string(reader: &mut impl Read) -> MyResult<String> {
     let length = usize::from(read_u16(reader)?);
     let mut vec: Vec<u8> = vec![0; length];
     reader.read_exact(vec.as_mut_slice())?;
-    String::from_utf8(vec).map_err(|e| io::Error::new(ErrorKind::InvalidData, e))
+    Ok(String::from_utf8(vec)?)
 }
 
 

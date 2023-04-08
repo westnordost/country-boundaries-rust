@@ -33,7 +33,7 @@ impl CountryBoundaries {
     ///
     /// # Errors
     /// Returns an error if the given data is not a valid country boundaries file.
-    pub fn from_reader(reader: impl io::Read) -> io::Result<Self> {
+    pub fn from_reader(reader: impl io::Read) -> Result<Self, Error> {
         from_reader(reader)
     }
 
