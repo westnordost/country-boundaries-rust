@@ -325,7 +325,7 @@ impl CountryBoundaries {
             let result = if x_step <= steps_x && y_step <= steps_y {
                 let x = (min_x + x_step) % self.raster_width;
                 let y = min_y + y_step;
-                Some(&self.raster[y * self.raster_width + x])
+                Some(self.cell(x, y))
             } else { None };
             
             if y_step < steps_y {
