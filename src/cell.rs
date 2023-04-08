@@ -64,7 +64,7 @@ mod tests {
             Cell { 
                 containing_ids: vec![s("A"), s("C")],
                 intersecting_areas: vec![]
-            }.get_ids(p(0,0))
+            }.get_ids(p(0, 0))
         );
     }
 
@@ -80,7 +80,7 @@ mod tests {
     fn dont_get_out_of_geometry_ids() {
         assert!(
             Cell { containing_ids: vec![], intersecting_areas: vec![b()] }
-                .get_ids(p(4,4))
+                .get_ids(p(4, 4))
                 .is_empty()
         )
     }
@@ -92,7 +92,7 @@ mod tests {
             Cell {
                 containing_ids: vec![s("A")],
                 intersecting_areas: vec![b()]
-            }.get_ids(p(1,1))
+            }.get_ids(p(1, 1))
         );
     }
 
@@ -112,7 +112,7 @@ mod tests {
         assert!(Cell {
             containing_ids: vec![s("A")],
             intersecting_areas: vec![]
-        }.is_in_any(p(0,0), &HashSet::from(["B", "A"])));
+        }.is_in_any(p(0, 0), &HashSet::from(["B", "A"])));
     }
 
     #[test]
@@ -120,7 +120,7 @@ mod tests {
         assert!(!Cell {
             containing_ids: vec![s("A")],
             intersecting_areas: vec![]
-        }.is_in_any(p(0,0), &HashSet::from(["B"])));
+        }.is_in_any(p(0, 0), &HashSet::from(["B"])));
     }
 
     #[test]
@@ -128,7 +128,7 @@ mod tests {
         assert!(Cell {
             containing_ids: vec![],
             intersecting_areas: vec![b()]
-        }.is_in_any(p(1,1), &HashSet::from(["B"])));
+        }.is_in_any(p(1, 1), &HashSet::from(["B"])));
     }
 
     #[test]
@@ -136,7 +136,7 @@ mod tests {
         assert!(!Cell {
             containing_ids: vec![],
             intersecting_areas: vec![b()]
-        }.is_in_any(p(4,4), &HashSet::from(["B"])));
+        }.is_in_any(p(4, 4), &HashSet::from(["B"])));
     }
 
     fn s(val: &str) -> String { String::from(val) }

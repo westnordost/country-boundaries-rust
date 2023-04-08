@@ -196,7 +196,7 @@ mod tests {
     #[test]
     fn test_read_point() {
         assert_eq!(
-            Point { x: 1, y: 2 } ,
+            Point { x: 1, y: 2 },
             read_point(&mut [0x00, 0x01, 0x00, 0x02].as_slice()).unwrap()
         );
     }
