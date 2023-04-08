@@ -38,22 +38,19 @@ impl Multipolygon {
 
 fn is_point_in_polygon(p: Point, v: &[Point]) -> bool {
     let mut wn = 0;
-    let mut i = v.len() - 1;
-    for j in 0 .. v.len() {
-        if v[i].y <= p.y {
-            if v[j].y > p.y {
-                if is_left(v[i], v[j], p) > 0 {
-                    wn += 1;
-                }
+    let mut a = match v.last() {
+        Some(a) => a,
+        None => { return false }
+    };
+    for b in v {
+        if a.y <= p.y {
+            if b.y > p.y && is_left(*a, *b, p) > 0 {
+                wn += 1;
             }
-        } else {
-            if v[j].y <= p.y {
-                if is_left(v[i], v[j], p) < 0 {
-                    wn -= 1;
-                }
-            }
+        } else if b.y <= p.y && is_left(*a, *b, p) < 0 {
+            wn -= 1;
         }
-        i = j;
+        a = b;
     }
     wn != 0
 }
