@@ -76,7 +76,7 @@ mod tests {
 
     #[test]
     fn simple_point_in_polygon() {
-        assert!(is_point_in_polygon(&p(5, 5), big_square().as_slice()));
+        assert!(is_point_in_polygon(p(5, 5), big_square().as_slice()));
     }
 
     #[test]
@@ -85,7 +85,7 @@ mod tests {
             outer: vec![big_square()],
             inner: vec![]
         }
-        .covers(&p(5, 5)));
+        .covers(p(5, 5)));
     }
 
     #[test]
@@ -94,7 +94,7 @@ mod tests {
             outer: vec![big_square()],
             inner: vec![hole()]
         }
-        .covers(&p(5, 5)));
+        .covers(p(5, 5)));
     }
 
     #[test]
@@ -103,7 +103,7 @@ mod tests {
             outer: vec![big_square(), small_square()],
             inner: vec![hole()]
 
-        }.covers(&p(5, 5)));
+        }.covers(p(5, 5)));
     }
 
     #[test]
@@ -113,14 +113,14 @@ mod tests {
             inner: vec![],
         };
 
-        assert!(polygon.covers(&p(0, 0)));
-        assert!(polygon.covers(&p(5, 0)));
-        assert!(polygon.covers(&p(0, 5)));
-        assert!(!polygon.covers(&p(0, 10)));
-        assert!(!polygon.covers(&p(10, 0)));
-        assert!(!polygon.covers(&p(5, 10)));
-        assert!(!polygon.covers(&p(10, 5)));
-        assert!(!polygon.covers(&p(10, 10)));
+        assert!(polygon.covers(p(0, 0)));
+        assert!(polygon.covers(p(5, 0)));
+        assert!(polygon.covers(p(0, 5)));
+        assert!(!polygon.covers(p(0, 10)));
+        assert!(!polygon.covers(p(10, 0)));
+        assert!(!polygon.covers(p(5, 10)));
+        assert!(!polygon.covers(p(10, 5)));
+        assert!(!polygon.covers(p(10, 10)));
     }
 
     fn p(x: u16, y: u16) -> Point {
