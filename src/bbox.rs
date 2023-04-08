@@ -16,10 +16,16 @@ impl BoundingBox {
 
     /// Creates a new `BoundingBox` or an error if any of the parameters is invalid or out of range:
     ///
+    /// # Errors
     /// - `min_latitude` must be smaller or equal than `max_latitude`
     /// - `min_latitude` and `max_latitude` must be between -90.0 and +90.0
     /// - all parameters must be not finite (neither `NaN` nor `Infinite`)
-    pub fn new(min_latitude: f64, min_longitude: f64, max_latitude: f64, max_longitude: f64) -> Result<BoundingBox, Error> {
+    pub fn new(
+        min_latitude: f64, 
+        min_longitude: f64, 
+        max_latitude: f64, 
+        max_longitude: f64
+    ) -> Result<Self, Error> {
         if !(-90.0..=90.0).contains(&min_latitude) {
             return Err(Error::new(format!(
                 "min_latitude {min_latitude} is out of bounds, must be within -90.0 and +90.0"
@@ -45,15 +51,16 @@ impl BoundingBox {
                 "max_longitude {max_longitude} must be finite"
             )))
         }
-        Ok(BoundingBox { min_latitude, min_longitude, max_latitude, max_longitude })
+        Ok(Self { min_latitude, min_longitude, max_latitude, max_longitude })
     }
 }
 
 impl std::fmt::Display for BoundingBox {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f,
-               "min: {}, {}, max: {}, {}",
-               self.min_latitude, self.min_longitude, self.max_latitude, self.max_longitude
+        write!(
+            f,
+            "min: {}, {}, max: {}, {}",
+            self.min_latitude, self.min_longitude, self.max_latitude, self.max_longitude
         )
     }
 }
@@ -91,7 +98,6 @@ mod tests {
     fn return_bbox() {
         assert!(BoundingBox::new(1.0, 0.0, 1.1, 0.0).is_ok());
         assert!(BoundingBox::new(-90.0, 0.0, 90.0, 0.0).is_ok());
-
     }
 
     #[test]

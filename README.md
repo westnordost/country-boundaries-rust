@@ -12,12 +12,11 @@ has pretty much the same API and uses the same file format.
 
 ```rust
 use std::collections::HashSet;
-use std::fs::File;
-use std::io::BufReader;
 use country_boundaries::{BoundingBox, CountryBoundaries, LatLon};
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let buf = BufReader::new(File::open("./data/boundaries360x180.ser")?);
-    let boundaries = CountryBoundaries::from_reader(buf)?;
+    let buf = std::fs::read("./data/boundaries360x180.ser")?;
+    let boundaries = CountryBoundaries::from_reader(buf.as_slice())?;
     
     // get country id(s) for Dallas¹
     assert_eq!(
@@ -50,6 +49,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         HashSet::new(),
         boundaries.containing_ids(BoundingBox::new(50.7679, 5.9865, 50.7358, 6.0599)?)
     );
+
     Ok(())
 }
 ```

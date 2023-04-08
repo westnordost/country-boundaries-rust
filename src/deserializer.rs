@@ -3,7 +3,7 @@ use std::io;
 use std::io::{ErrorKind, Read};
 use crate::cell::Cell;
 use crate::cell::multipolygon::Multipolygon;
-use crate::cell::point::Point;
+use crate::cell::multipolygon::Point;
 use crate::{CountryBoundaries, Error};
 
 /// Deserialize a `CountryBoundaries` from an IO stream.

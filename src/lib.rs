@@ -3,7 +3,7 @@
 
 use std::{cmp::min, collections::HashMap, collections::HashSet, io, vec::Vec};
 use cell::Cell;
-use crate::cell::point::Point;
+use cell::multipolygon::Point;
 use crate::deserializer::from_reader;
 
 pub use self::latlon::LatLon;

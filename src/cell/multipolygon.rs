@@ -1,4 +1,8 @@
-use crate::cell::point::Point;
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct Point {
+    pub x: u16,
+    pub y: u16
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Multipolygon {
@@ -64,7 +68,6 @@ fn is_left(p0: &Point, p1: &Point, p: &Point) -> i64 {
 mod tests {
     use super::*;
 
-
     fn big_square() -> Vec<Point> { vec![p(0, 0), p(0, 10), p(10, 10), p(10, 0)] }
     fn hole() -> Vec<Point> { vec![p(2, 2), p(2, 8), p(8, 8), p(8, 2)] }
     fn small_square() -> Vec<Point> { vec![p(4, 4), p(4, 6), p(6, 6), p(6, 4)] }
@@ -76,23 +79,28 @@ mod tests {
 
     #[test]
     fn covers_simple_polygon() {
-        assert!(Multipolygon { outer: vec![big_square()], inner: vec![] }
-            .covers(&p(5, 5))
-        );
+        assert!(Multipolygon {
+            outer: vec![big_square()],
+            inner: vec![]
+        }
+        .covers(&p(5, 5)));
     }
 
     #[test]
     fn does_not_cover_hole() {
-        assert!(!Multipolygon { outer: vec![big_square()], inner: vec![hole()] }
-            .covers(&p(5, 5))
-        );
+        assert!(!Multipolygon { 
+            outer: vec![big_square()], 
+            inner: vec![hole()]
+        }
+        .covers(&p(5, 5)));
     }
 
     #[test]
     fn does_cover_polygon_in_hole() {
-        assert!(Multipolygon { outer: vec![big_square(), small_square()], inner: vec![hole()] }
-            .covers(&p(5, 5))
-        );
+        assert!(Multipolygon { 
+            outer: vec![big_square(), small_square()], 
+            inner: vec![hole()]
+        }.covers(&p(5, 5)));
     }
 
     #[test]

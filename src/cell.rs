@@ -1,12 +1,11 @@
 use std::collections::HashSet;
 
-use point::Point;
+use multipolygon::Point;
 use multipolygon::Multipolygon;
 
 pub mod multipolygon;
-pub mod point;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 /// One cell in the country boundaries grid
 pub struct Cell {
     /// Areas that completely cover this cell
