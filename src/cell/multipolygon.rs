@@ -85,8 +85,8 @@ mod tests {
 
     #[test]
     fn does_not_cover_hole() {
-        assert!(!Multipolygon { 
-            outer: vec![big_square()], 
+        assert!(!Multipolygon {
+            outer: vec![big_square()],
             inner: vec![hole()]
         }
         .covers(p(5, 5)));
@@ -94,8 +94,8 @@ mod tests {
 
     #[test]
     fn does_cover_polygon_in_hole() {
-        assert!(Multipolygon { 
-            outer: vec![big_square(), small_square()], 
+        assert!(Multipolygon {
+            outer: vec![big_square(), small_square()],
             inner: vec![hole()]
         }.covers(p(5, 5)));
     }

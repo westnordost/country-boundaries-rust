@@ -21,9 +21,9 @@ impl BoundingBox {
     /// - `min_latitude` and `max_latitude` must be between -90.0 and +90.0
     /// - all parameters must be not finite (neither `NaN` nor `Infinite`)
     pub fn new(
-        min_latitude: f64, 
-        min_longitude: f64, 
-        max_latitude: f64, 
+        min_latitude: f64,
+        min_longitude: f64,
+        max_latitude: f64,
         max_longitude: f64
     ) -> Result<Self, Error> {
         if !(-90.0..=90.0).contains(&min_latitude) {
