@@ -19,7 +19,7 @@ impl Cell {
     pub fn is_in(&self, point: Point, id: &str) -> bool {
         self.containing_ids.iter().any(|cid| cid == id)
         ||
-        self.intersecting_areas.iter().any(|a| a.0 == id && a.1.covers(&point))
+        self.intersecting_areas.iter().any(|a| a.0 == id && a.1.covers(point))
     }
 
     /// Returns whether the given position is in any area with the given `ids`
@@ -30,14 +30,14 @@ impl Cell {
         ||
         self.intersecting_areas
             .iter()
-            .any(|a| ids.contains(a.0.as_str()) && a.1.covers(&point))
+            .any(|a| ids.contains(a.0.as_str()) && a.1.covers(point))
     }
 
     /// Return all ids of areas that cover the given `position` (in no particular order)
     pub fn get_ids(&self, point: Point) -> Vec<&str> {
         self.intersecting_areas
             .iter()
-            .filter(|a| a.1.covers(&point))
+            .filter(|a| a.1.covers(point))
             .map(|a| a.0.as_str())
             .chain(self.containing_ids.iter().map(String::as_str))
             .collect()
