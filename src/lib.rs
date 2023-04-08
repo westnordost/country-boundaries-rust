@@ -225,6 +225,7 @@ impl CountryBoundaries {
                 first_cell = false;
             } else {
                 ids.retain(|&id| cell.containing_ids.iter().any(|containing_id| containing_id == id));
+                if ids.is_empty() { return ids; }
             }
         }
         ids
