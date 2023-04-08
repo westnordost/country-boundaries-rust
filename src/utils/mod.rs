@@ -102,8 +102,8 @@ mod tests {
         assert!(Multipolygon {
             outer: vec![big_square(), small_square()],
             inner: vec![hole()]
-        }
-        .covers(&p(5, 5)));
+
+        }.covers(&p(5, 5)));
     }
 
     #[test]
