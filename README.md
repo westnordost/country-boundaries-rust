@@ -8,6 +8,10 @@ Find the area in which a geo position is located.
 It is a port of the [Java library of the same name](https://github.com/westnordost/countryboundaries/),
 has pretty much the same API and uses the same file format.
 
+# Copyright and License
+
+© 2023 Tobias Zwick. This library is released under the terms of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+
 # Example usage
 
 ```rust
@@ -24,7 +28,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         boundaries.ids(LatLon::new(33.0, -97.0)?)
     );
     
-        // check that German exclave in Switzerland² is in Germany
+    // check that German exclave in Switzerland² is in Germany
     assert!(
         boundaries.is_in(LatLon::new(47.6973, 8.6910)?, "DE")
     );
@@ -32,7 +36,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // check if position is in any country where the first day of the workweek is Saturday. It is
     // more efficient than calling `is_in` for every id in a row.
     assert!(
-        boundaries.is_in_any(
+        !boundaries.is_in_any(
             LatLon::new(21.0, 96.0)?,
             &HashSet::from(["BD", "DJ", "IR", "PS"])
         )
@@ -40,14 +44,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     // get which country ids can be found within a bounding box around the Vaalserberg³
     assert_eq!(
-        HashSet::from(["DE", "BE", "NL"]),
-        boundaries.intersecting_ids(BoundingBox::new(50.7679, 5.9865, 50.7358, 6.0599)?)
+        HashSet::from(["NL", "LU", "DE", "BE", "BE-VLG", "BE-WAL"]),
+        boundaries.intersecting_ids(BoundingBox::new(50.6, 5.9, 50.8, 6.1)?)
     );
     
     // get which country ids completely cover a bounding box around the Vaalserberg³
     assert_eq!(
         HashSet::new(),
-        boundaries.containing_ids(BoundingBox::new(50.7679, 5.9865, 50.7358, 6.0599)?)
+        boundaries.containing_ids(BoundingBox::new(50.6, 5.9, 50.8, 6.1)?)
     );
 
     Ok(())

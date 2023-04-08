@@ -67,7 +67,7 @@ impl CountryBoundaries {
     /// // check if position is in any country where the first day of the workweek is Saturday. It is
     /// // more efficient than calling `is_in` for every id in a row.
     /// assert!(
-    ///     boundaries.is_in_any(
+    ///     !boundaries.is_in_any(
     ///         LatLon::new(21.0, 96.0)?,
     ///         &HashSet::from(["BD", "DJ", "IR", "PS"])
     ///     )
