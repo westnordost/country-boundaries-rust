@@ -3,7 +3,7 @@
 
 use std::{cmp::min, collections::HashMap, collections::HashSet, io, vec::Vec};
 use cell::Cell;
-use cell::multipolygon::Point;
+use multipolygon::Point;
 use crate::deserializer::from_reader;
 
 pub use self::latlon::LatLon;
@@ -15,6 +15,7 @@ mod bbox;
 mod cell;
 mod deserializer;
 mod error;
+mod multipolygon;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct CountryBoundaries {

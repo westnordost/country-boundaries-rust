@@ -1,9 +1,7 @@
 use std::collections::HashSet;
 
-use multipolygon::Point;
-use multipolygon::Multipolygon;
-
-pub mod multipolygon;
+use crate::multipolygon::Point;
+use crate::multipolygon::Multipolygon;
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 /// One cell in the country boundaries grid

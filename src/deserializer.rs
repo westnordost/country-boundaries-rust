@@ -2,8 +2,8 @@ use std::collections::HashMap;
 use std::io;
 use std::io::{ErrorKind, Read};
 use crate::cell::Cell;
-use crate::cell::multipolygon::Multipolygon;
-use crate::cell::multipolygon::Point;
+use crate::multipolygon::Multipolygon;
+use crate::multipolygon::Point;
 use crate::{CountryBoundaries, Error};
 
 /// Deserialize a `CountryBoundaries` from an IO stream.
