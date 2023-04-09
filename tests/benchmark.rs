@@ -15,7 +15,7 @@ fn benchmark() {
     println!("Loading data took {:.2} seconds", loading_time.elapsed().as_secs_f64());
 
     let rng = fastrand::Rng::new();
-    let checks = 10_000_000;
+    let checks = 100_000_000;
 
     let time = Instant::now();
     for _ in 0..checks {
