@@ -105,8 +105,8 @@ impl CountryBoundaries {
         let mut result = cell.get_ids(point);
         let zero = 0.0;
         result.sort_by(|&a, &b| {
-            let a = if let Some(size) = self.geometry_sizes.get(a) { size } else { &zero };
-            let b = if let Some(size) = self.geometry_sizes.get(b) { size } else { &zero };
+            let a = self.geometry_sizes.get(a).unwrap_or(&zero);
+            let b = self.geometry_sizes.get(b).unwrap_or(&zero);
             a.total_cmp(b)
         });
         result
