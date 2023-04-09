@@ -199,14 +199,15 @@ impl CountryBoundaries {
     }
 
     fn longitude_to_cell_x(&self, longitude: f64) -> usize {
+        let raster_width = self.raster_width as f64;
         min(
             self.raster_width.saturating_sub(1),
-            ((self.raster_width as f64) * (180.0 + longitude) / 360.0).floor() as usize
+            (raster_width * (180.0 + longitude) / 360.0).floor() as usize
         )
     }
 
     fn latitude_to_cell_y(&self, latitude: f64) -> usize {
-        let raster_height = self.raster.len() as f64 / self.raster_width as f64;
+        let raster_height = (self.raster.len() / self.raster_width) as f64;
         ((raster_height * (90.0 - latitude) / 180.0).ceil() as usize).saturating_sub(1)
     }
 
@@ -214,15 +215,14 @@ impl CountryBoundaries {
         let raster_width = self.raster_width as f64;
         let cell_x = cell_x as f64;
         let cell_longitude = -180.0 + 360.0 * cell_x / raster_width;
-        ((longitude - cell_longitude) * 0xffff as f64 * 360.0 / raster_width).floor() as u16
+        ((longitude - cell_longitude) * 360.0 * 0xffff as f64 / raster_width) as u16
     }
 
     fn latitude_to_local_y(&self, cell_y: usize, latitude: f64) -> u16 {
-        let raster_width = self.raster_width as f64;
-        let raster_height = self.raster.len() as f64 / raster_width;
+        let raster_height = (self.raster.len() / self.raster_width) as f64;
         let cell_y = cell_y as f64;
         let cell_latitude = 90.0 - 180.0 * (cell_y + 1.0) / raster_height;
-        ((latitude - cell_latitude) * 0xffff as f64 * 180.0 / raster_height).floor() as u16
+        ((latitude - cell_latitude) * 180.0 * 0xffff as f64 / raster_height) as u16
     }
 
     fn cells(&self, bounds: &BoundingBox) -> impl Iterator<Item = &Cell> {
