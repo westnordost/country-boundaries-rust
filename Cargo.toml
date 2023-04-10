@@ -12,6 +12,3 @@ keywords = ["geocoding", "openstreetmap"]
 
 [dependencies]
 thiserror = "1.0"
-
-[dev-dependencies]
-fastrand = "1.9"

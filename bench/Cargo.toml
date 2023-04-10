@@ -1,0 +1,9 @@
+[package]
+name = "country-boundaries-bench"
+version = "0.0.0"
+edition = "2021"
+description = "Benchmark for the parent project"
+
+[dependencies]
+country-boundaries = { path = ".." }
+fastrand = "1.9"

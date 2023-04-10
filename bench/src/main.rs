@@ -2,8 +2,7 @@ use country_boundaries::{self, CountryBoundaries, LatLon};
 use std::fs;
 use std::time::Instant;
 
-#[test]
-fn benchmark() {
+fn main() {
     // Yeah, this is not really a test but some custom benchmark since the #[bench] stuff is still
     // unstable. Be sure to run this with release profile to get the real speeds. Debug profile
     // seems to be about ~4 times slower in the case of this crate at least, i.e. like this
@@ -37,7 +36,7 @@ fn benchmark() {
 }
 
 fn boundaries() -> CountryBoundaries {
-    let buf = fs::read("./data/boundaries360x180.ser");
+    let buf = fs::read("../data/boundaries360x180.ser");
     return CountryBoundaries::from_reader(buf.unwrap().as_slice()).unwrap();
 }
 

@@ -1,3 +1,5 @@
 /target
 /Cargo.lock
 /.idea
+/bench/target
+/bench/Cargo.lock
