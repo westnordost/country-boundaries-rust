@@ -42,7 +42,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
     );
     
-    // get which country ids can be found within a bounding box around the Vaalserberg³
+    // get which country ids can be found within the cell(s) that contain a bounding box around the Vaalserberg³
     assert_eq!(
         HashSet::from(["NL", "LU", "DE", "BE", "BE-VLG", "BE-WAL"]),
         boundaries.intersecting_ids(BoundingBox::new(50.6, 5.9, 50.8, 6.1)?)
