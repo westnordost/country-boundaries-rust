@@ -3,12 +3,6 @@ use std::fs;
 use std::time::Instant;
 
 fn main() {
-    // Yeah, this is not really a test but some custom benchmark since the #[bench] stuff is still
-    // unstable. Be sure to run this with release profile to get the real speeds. Debug profile
-    // seems to be about ~4 times slower in the case of this crate at least, i.e. like this
-    //
-    // cargo test --test benchmark -r -- -Z unstable-options --show-output
-
     let loading_time = Instant::now();
     let boundaries = boundaries();
     println!("Loading data took {:.2} seconds", loading_time.elapsed().as_secs_f64());

@@ -1,6 +1,6 @@
 [package]
 name = "country-boundaries"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
 description = "A fast offline reverse country geocoder"
 authors = ["Tobias Zwick"]
@@ -9,6 +9,3 @@ repository = "https://github.com/westnordost/country-boundaries-rust/"
 categories = ["internationalization"]
 keywords = ["geocoding", "openstreetmap"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-thiserror = "1.0"

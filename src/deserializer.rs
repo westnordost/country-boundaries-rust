@@ -1,6 +1,6 @@
 use std::collections::HashMap;
+use std::fmt;
 use std::io::Read;
-use thiserror::Error;
 use crate::cell::Cell;
 use crate::multipolygon::Multipolygon;
 use crate::multipolygon::Point;
@@ -8,20 +8,55 @@ use crate::CountryBoundaries;
 
 type Result<T> = std::result::Result<T, ReadError>;
 
-#[derive(Error, Debug)]
+#[derive(Debug)]
 pub enum ReadError {
-    #[error("Wrong version number '{actual}' of the boundaries file (expected: '{expected}'). \
-             You may need to get the current version of the data.")]
     WrongVersionNumber { expected: u16, actual: u16 },
+    UnableToParseUsize(std::num::TryFromIntError),
+    UnableToDecodeUtf8(std::string::FromUtf8Error),
+    Io(std::io::Error),
+}
 
-    #[error("Unable to parse usize from '{0}'")]
-    UnableToParseUsize(#[from] std::num::TryFromIntError),
+impl std::error::Error for ReadError {}
 
-    #[error("Unable to decode UTF-8 string from '{0}'")]
-    UnableToDecodeUtf8(#[from] std::string::FromUtf8Error),
+impl fmt::Display for ReadError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            ReadError::WrongVersionNumber { expected, actual } => {
+                write!(f,
+                       "Wrong version number '{actual}' of the boundaries file \
+                       (expected: '{expected}'). \
+                       You may need to get the current version of the data."
+                )
+            }
+            ReadError::UnableToParseUsize(e) => {
+                write!(f, "Unable to parse usize from '{}'", e)
+            }
+            ReadError::UnableToDecodeUtf8(e) => {
+                write!(f, "Unable to decode UTF-8 string from '{}'", e)
+            }
+            ReadError::Io(e) => {
+                write!(f, "IO error: {}", e)
+            }
+        }
+    }
+}
 
-    #[error("IO error: {0}")]
-    Io(#[from] std::io::Error),
+impl From<std::num::TryFromIntError> for ReadError {
+    fn from(error: std::num::TryFromIntError) -> Self {
+        Self::UnableToParseUsize(error)
+    }
+}
+
+impl From<std::string::FromUtf8Error> for ReadError {
+    fn from(error: std::string::FromUtf8Error) -> Self {
+        Self::UnableToDecodeUtf8(error)
+    }
+}
+
+impl From<std::io::Error> for ReadError {
+    fn from(error: std::io::Error) -> Self {
+        Self::Io(error)
+    }
 }
 
 /// Deserialize a `CountryBoundaries` from an IO stream.
