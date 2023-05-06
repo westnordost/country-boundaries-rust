@@ -5,14 +5,22 @@ pub struct BoundingBox {
     min_latitude: f64,
     min_longitude: f64,
     max_latitude: f64,
-    max_longitude: f64
+    max_longitude: f64,
 }
 
 impl BoundingBox {
-    pub fn min_latitude(&self) -> f64 { self.min_latitude }
-    pub fn min_longitude(&self) -> f64 { self.min_longitude }
-    pub fn max_latitude(&self) -> f64 { self.max_latitude }
-    pub fn max_longitude(&self) -> f64 { self.max_longitude }
+    pub fn min_latitude(&self) -> f64 {
+        self.min_latitude
+    }
+    pub fn min_longitude(&self) -> f64 {
+        self.min_longitude
+    }
+    pub fn max_latitude(&self) -> f64 {
+        self.max_latitude
+    }
+    pub fn max_longitude(&self) -> f64 {
+        self.max_longitude
+    }
 
     /// Creates a new `BoundingBox` or an error if any of the parameters is invalid or out of range:
     ///
@@ -24,12 +32,12 @@ impl BoundingBox {
         min_latitude: f64,
         min_longitude: f64,
         max_latitude: f64,
-        max_longitude: f64
+        max_longitude: f64,
     ) -> Result<Self, Error> {
         if !(-90.0..=90.0).contains(&min_latitude) {
             return Err(Error::LatitudeOutOfBounds {
                 param: "min_latitude",
-                latitude: min_latitude
+                latitude: min_latitude,
             });
         }
         if !(-90.0..=90.0).contains(&max_latitude) {
@@ -56,7 +64,12 @@ impl BoundingBox {
                 longitude: max_longitude,
             });
         }
-        Ok(Self { min_latitude, min_longitude, max_latitude, max_longitude })
+        Ok(Self {
+            min_latitude,
+            min_longitude,
+            max_latitude,
+            max_longitude,
+        })
     }
 }
 
@@ -77,9 +90,9 @@ mod tests {
     #[test]
     fn return_errors() {
         assert!(BoundingBox::new(-90.0001, 0.0, 0.0, 0.0).is_err());
-        assert!(BoundingBox::new( 90.0001, 0.0, 0.0, 0.0).is_err());
+        assert!(BoundingBox::new(90.0001, 0.0, 0.0, 0.0).is_err());
         assert!(BoundingBox::new(0.0, 0.0, -90.0001, 0.0).is_err());
-        assert!(BoundingBox::new(0.0, 0.0,  90.0001, 0.0).is_err());
+        assert!(BoundingBox::new(0.0, 0.0, 90.0001, 0.0).is_err());
 
         assert!(BoundingBox::new(1.1, 0.0, 1.0, 0.0).is_err());
 

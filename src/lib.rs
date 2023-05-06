@@ -1,21 +1,21 @@
 // Use README.md in a documentation on github, crates.io, and docs site, as well as unit test the examples in it.
 #![doc = include_str!("../README.md")]
 
-use std::{cmp::min, collections::HashMap, collections::HashSet, io, vec::Vec};
+use crate::deserializer::from_reader;
 use cell::Cell;
 use multipolygon::Point;
-use crate::deserializer::from_reader;
+use std::{cmp::min, collections::HashMap, collections::HashSet, io, vec::Vec};
 
-pub use self::latlon::LatLon;
 pub use self::bbox::BoundingBox;
-pub use self::error::Error;
 pub use self::deserializer::ReadError;
+pub use self::error::Error;
+pub use self::latlon::LatLon;
 
-mod latlon;
 mod bbox;
 mod cell;
 mod deserializer;
 mod error;
+mod latlon;
 mod multipolygon;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -25,11 +25,10 @@ pub struct CountryBoundaries {
     /// width of the raster
     raster_width: usize,
     /// the sizes of the different countries contained
-    geometry_sizes: HashMap<String, f64>
+    geometry_sizes: HashMap<String, f64>,
 }
 
 impl CountryBoundaries {
-
     /// Create a `CountryBoundaries` from a stream of bytes.
     ///
     /// # Errors
@@ -145,7 +144,9 @@ impl CountryBoundaries {
                         .iter()
                         .any(|containing_id| containing_id == id)
                 });
-                if ids.is_empty() { return ids; }
+                if ids.is_empty() {
+                    return ids;
+                }
             }
         }
         ids
@@ -189,8 +190,8 @@ impl CountryBoundaries {
             self.cell(cell_x, cell_y),
             Point {
                 x: self.longitude_to_local_x(cell_x, normalized_longitude),
-                y: self.latitude_to_local_y(cell_y, position.latitude())
-            }
+                y: self.latitude_to_local_y(cell_y, position.latitude()),
+            },
         )
     }
 
@@ -202,7 +203,7 @@ impl CountryBoundaries {
         let raster_width = self.raster_width as f64;
         min(
             self.raster_width.saturating_sub(1),
-            (raster_width * (180.0 + longitude) / 360.0).floor() as usize
+            (raster_width * (180.0 + longitude) / 360.0).floor() as usize,
         )
     }
 
@@ -253,7 +254,7 @@ impl CountryBoundaries {
             } else {
                 None
             };
-            
+
             if y_step < steps_y {
                 y_step += 1;
             } else {
@@ -319,7 +320,7 @@ mod tests {
         min_latitude: f64,
         min_longitude: f64,
         max_latitude: f64,
-        max_longitude: f64
+        max_longitude: f64,
     ) -> BoundingBox {
         BoundingBox::new(min_latitude, min_longitude, max_latitude, max_longitude).unwrap()
     }
@@ -335,7 +336,7 @@ mod tests {
         let boundaries = CountryBoundaries {
             raster: vec![cell!(&["A"]), cell!(&["B"]), cell!(&["C"]), cell!(&["D"])],
             raster_width: 2,
-            geometry_sizes: HashMap::new()
+            geometry_sizes: HashMap::new(),
         };
 
         assert_eq!(vec!["C"], boundaries.ids(latlon(-90.0, -180.0)));
@@ -361,19 +362,18 @@ mod tests {
         assert_eq!(vec!["D"], boundaries.ids(latlon(-90.0, 90.0)));
     }
 
-
     #[test]
     fn no_array_index_out_of_bounds_at_world_edges() {
         let boundaries = CountryBoundaries {
             raster: vec![cell!(&["A"])],
             raster_width: 1,
-            geometry_sizes: HashMap::new()
+            geometry_sizes: HashMap::new(),
         };
 
         boundaries.ids(latlon(-90.0, -180.0));
-        boundaries.ids(latlon( 90.0,  180.0));
-        boundaries.ids(latlon( 90.0, -180.0));
-        boundaries.ids(latlon(-90.0,  180.0));
+        boundaries.ids(latlon(90.0, 180.0));
+        boundaries.ids(latlon(90.0, -180.0));
+        boundaries.ids(latlon(-90.0, 180.0));
     }
 
     #[test]
@@ -386,7 +386,7 @@ mod tests {
                 (String::from("B"), 15.0),
                 (String::from("C"), 100.0),
                 (String::from("D"), 800.0),
-            ])
+            ]),
         };
         assert_eq!(vec!["A", "B", "C", "D"], boundaries.ids(latlon(1.0, 1.0)));
     }
@@ -394,9 +394,14 @@ mod tests {
     #[test]
     fn get_intersecting_ids_in_bbox_is_merged_correctly() {
         let boundaries = CountryBoundaries {
-            raster: vec![cell!(&["A"]), cell!(&["B"]), cell!(&["C"]), cell!(&["D", "E"])],
+            raster: vec![
+                cell!(&["A"]),
+                cell!(&["B"]),
+                cell!(&["C"]),
+                cell!(&["D", "E"]),
+            ],
             raster_width: 2,
-            geometry_sizes: HashMap::new()
+            geometry_sizes: HashMap::new(),
         };
         assert_eq!(
             HashSet::from(["A", "B", "C", "D", "E"]),
@@ -409,7 +414,7 @@ mod tests {
         let boundaries = CountryBoundaries {
             raster: vec![cell!(&["A"]), cell!(&["B"]), cell!(&["C"])],
             raster_width: 3,
-            geometry_sizes: HashMap::new()
+            geometry_sizes: HashMap::new(),
         };
         assert_eq!(
             HashSet::from(["A", "C"]),
@@ -422,7 +427,7 @@ mod tests {
         let boundaries = CountryBoundaries {
             raster: vec![cell!(&["A", "B", "C"]), cell!(&["X"]), cell!(&["A", "B"])],
             raster_width: 3,
-            geometry_sizes: HashMap::new()
+            geometry_sizes: HashMap::new(),
         };
         assert_eq!(
             HashSet::from(["A", "B"]),
@@ -430,15 +435,21 @@ mod tests {
         )
     }
 
-
     #[test]
     fn get_containing_ids_in_bbox_returns_correct_result_when_one_cell_is_empty() {
         let boundaries = CountryBoundaries {
-            raster: vec![cell!(&[] as &[&str; 0]), cell!(&["A"]), cell!(&["A"]), cell!(&["A"])],
+            raster: vec![
+                cell!(&[] as &[&str; 0]),
+                cell!(&["A"]),
+                cell!(&["A"]),
+                cell!(&["A"]),
+            ],
             raster_width: 2,
-            geometry_sizes: HashMap::new()
+            geometry_sizes: HashMap::new(),
         };
-        assert!(boundaries.containing_ids(bbox(-10.0, -10.0, 10.0, 10.0)).is_empty())
+        assert!(boundaries
+            .containing_ids(bbox(-10.0, -10.0, 10.0, 10.0))
+            .is_empty())
     }
 
     #[test]
@@ -451,7 +462,7 @@ mod tests {
                 cell!(&["D", "A"]),
             ],
             raster_width: 2,
-            geometry_sizes: HashMap::new()
+            geometry_sizes: HashMap::new(),
         };
         assert_eq!(
             HashSet::from(["A"]),
@@ -464,9 +475,11 @@ mod tests {
         let boundaries = CountryBoundaries {
             raster: vec![cell!(&["A"]), cell!(&["B"]), cell!(&["C"]), cell!(&["D"])],
             raster_width: 2,
-            geometry_sizes: HashMap::new()
+            geometry_sizes: HashMap::new(),
         };
 
-        assert!(boundaries.containing_ids(bbox(-10.0, -10.0, 10.0, 10.0)).is_empty())
+        assert!(boundaries
+            .containing_ids(bbox(-10.0, -10.0, 10.0, 10.0))
+            .is_empty())
     }
 }

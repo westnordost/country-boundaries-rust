@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
-use crate::multipolygon::Point;
 use crate::multipolygon::Multipolygon;
+use crate::multipolygon::Point;
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 /// One cell in the country boundaries grid
@@ -9,15 +9,17 @@ pub struct Cell {
     /// Areas that completely cover this cell
     pub containing_ids: Vec<String>,
     /// Id + Areas that only partly cover this cell
-    pub intersecting_areas: Vec<(String, Multipolygon)>
+    pub intersecting_areas: Vec<(String, Multipolygon)>,
 }
 
 impl Cell {
     /// Returns whether the given `position` is in the area with the given `id`
     pub fn is_in(&self, point: Point, id: &str) -> bool {
         self.containing_ids.iter().any(|cid| cid == id)
-        ||
-        self.intersecting_areas.iter().any(|a| a.0 == id && a.1.covers(point))
+            || self
+                .intersecting_areas
+                .iter()
+                .any(|a| a.0 == id && a.1.covers(point))
     }
 
     /// Returns whether the given position is in any area with the given `ids`
@@ -25,10 +27,10 @@ impl Cell {
         self.containing_ids
             .iter()
             .any(|containing_id| ids.contains(containing_id.as_str()))
-        ||
-        self.intersecting_areas
-            .iter()
-            .any(|a| ids.contains(a.0.as_str()) && a.1.covers(point))
+            || self
+                .intersecting_areas
+                .iter()
+                .any(|a| ids.contains(a.0.as_str()) && a.1.covers(point))
     }
 
     /// Return all ids of areas that cover the given `position` (in no particular order)
@@ -59,10 +61,11 @@ mod tests {
     fn get_definite_ids() {
         assert_eq!(
             vec!["A", "C"],
-            Cell { 
+            Cell {
                 containing_ids: vec![s("A"), s("C")],
                 intersecting_areas: vec![]
-            }.get_ids(p(0, 0))
+            }
+            .get_ids(p(0, 0))
         );
     }
 
@@ -70,17 +73,22 @@ mod tests {
     fn get_in_geometry_ids() {
         assert_eq!(
             vec!["B"],
-            Cell { containing_ids: vec![], intersecting_areas: vec![b()] }.get_ids(p(1, 1))
+            Cell {
+                containing_ids: vec![],
+                intersecting_areas: vec![b()]
+            }
+            .get_ids(p(1, 1))
         )
     }
 
     #[test]
     fn dont_get_out_of_geometry_ids() {
-        assert!(
-            Cell { containing_ids: vec![], intersecting_areas: vec![b()] }
-                .get_ids(p(4, 4))
-                .is_empty()
-        )
+        assert!(Cell {
+            containing_ids: vec![],
+            intersecting_areas: vec![b()]
+        }
+        .get_ids(p(4, 4))
+        .is_empty())
     }
 
     #[test]
@@ -90,7 +98,8 @@ mod tests {
             Cell {
                 containing_ids: vec![s("A")],
                 intersecting_areas: vec![b()]
-            }.get_ids(p(1, 1))
+            }
+            .get_ids(p(1, 1))
         );
     }
 
@@ -101,7 +110,8 @@ mod tests {
             Cell {
                 containing_ids: vec![s("A")],
                 intersecting_areas: vec![b()]
-            }.get_all_ids()
+            }
+            .get_all_ids()
         );
     }
 
@@ -110,7 +120,8 @@ mod tests {
         assert!(Cell {
             containing_ids: vec![s("A")],
             intersecting_areas: vec![]
-        }.is_in_any(p(0, 0), &HashSet::from(["B", "A"])));
+        }
+        .is_in_any(p(0, 0), &HashSet::from(["B", "A"])));
     }
 
     #[test]
@@ -118,7 +129,8 @@ mod tests {
         assert!(!Cell {
             containing_ids: vec![s("A")],
             intersecting_areas: vec![]
-        }.is_in_any(p(0, 0), &HashSet::from(["B"])));
+        }
+        .is_in_any(p(0, 0), &HashSet::from(["B"])));
     }
 
     #[test]
@@ -126,7 +138,8 @@ mod tests {
         assert!(Cell {
             containing_ids: vec![],
             intersecting_areas: vec![b()]
-        }.is_in_any(p(1, 1), &HashSet::from(["B"])));
+        }
+        .is_in_any(p(1, 1), &HashSet::from(["B"])));
     }
 
     #[test]
@@ -134,18 +147,21 @@ mod tests {
         assert!(!Cell {
             containing_ids: vec![],
             intersecting_areas: vec![b()]
-        }.is_in_any(p(4, 4), &HashSet::from(["B"])));
+        }
+        .is_in_any(p(4, 4), &HashSet::from(["B"])));
     }
 
-    fn s(val: &str) -> String { String::from(val) }
+    fn s(val: &str) -> String {
+        String::from(val)
+    }
 
     fn b() -> (String, Multipolygon) {
         (
             s("B"),
             Multipolygon {
                 outer: vec![vec![p(0, 0), p(0, 2), p(2, 2), p(2, 0)]],
-                inner: vec![]
-            }
+                inner: vec![],
+            },
         )
     }
 
