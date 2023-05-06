@@ -1,5 +1,6 @@
 // Use README.md in a documentation on github, crates.io, and docs site, as well as unit test the examples in it.
-#![doc = include_str!("../README.md")]
+// The readme is only included if ran with `cargo doc --all-features` (or a specific feature). Otherwise may not compile.
+#![cfg_attr(feature = "lazy_static", doc = include_str!("../README.md"))]
 
 use crate::deserializer::from_reader;
 use cell::Cell;
@@ -17,6 +18,30 @@ mod deserializer;
 mod error;
 mod latlon;
 mod multipolygon;
+
+#[cfg(feature = "lazy_static")]
+lazy_static::lazy_static! {
+    /// The country boundaries data for the whole world under ODBl license.
+    pub static ref COUNTRY_BOUNDARIES: CountryBoundaries = {
+        let data = if cfg!(feature = "with_ODBL_licensed_OSM_data_high") {
+            include_bytes!("../data/boundaries360x180.ser").as_slice()
+        } else if cfg!(feature = "with_ODBL_licensed_OSM_data_mid") {
+            include_bytes!("../data/boundaries180x90.ser").as_slice()
+        } else if cfg!(feature = "with_ODBL_licensed_OSM_data_low") {
+            include_bytes!("../data/boundaries60x30.ser").as_slice()
+        } else {
+            unreachable!()
+        };
+        #[cfg(not(any(
+            feature = "with_ODBL_licensed_OSM_data_high",
+            feature = "with_ODBL_licensed_OSM_data_mid",
+            feature = "with_ODBL_licensed_OSM_data_low"
+        )))]
+        compile_error!("Do not use `lazy_static` feature directly. See README");
+
+        CountryBoundaries::from_reader(data).unwrap()
+    };
+}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct CountryBoundaries {

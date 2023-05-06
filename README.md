@@ -14,44 +14,46 @@ has pretty much the same API and uses the same file format.
 
 # Example usage
 
+Add to your `Cargo.toml`.  When using ODBL features, you must adhere to the ODbL license.
+```toml
+[dependencies]
+country-boundaries = { version = "1", features = ["with_ODBL_licensed_OSM_data_high"] }
+```
+
 ```rust
 use std::collections::HashSet;
-use country_boundaries::{BoundingBox, CountryBoundaries, LatLon};
+use country_boundaries::{BoundingBox, COUNTRY_BOUNDARIES, LatLon};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let buf = std::fs::read("./data/boundaries360x180.ser")?;
-    let boundaries = CountryBoundaries::from_reader(buf.as_slice())?;
-    
+
     // get country id(s) for Dallas¹
     assert_eq!(
         vec!["US-TX", "US"],
-        boundaries.ids(LatLon::new(33.0, -97.0)?)
+        COUNTRY_BOUNDARIES.ids(LatLon::new(33.0, -97.0)?)
     );
-    
+
     // check that German exclave in Switzerland² is in Germany
-    assert!(
-        boundaries.is_in(LatLon::new(47.6973, 8.6910)?, "DE")
-    );
-    
+    assert!(COUNTRY_BOUNDARIES.is_in(LatLon::new(47.6973, 8.6910)?, "DE"));
+
     // check if position is in any country where the first day of the workweek is Saturday. It is
     // more efficient than calling `is_in` for every id in a row.
     assert!(
-        !boundaries.is_in_any(
+        !COUNTRY_BOUNDARIES.is_in_any(
             LatLon::new(21.0, 96.0)?,
             &HashSet::from(["BD", "DJ", "IR", "PS"])
         )
     );
-    
+
     // get which country ids can be found within the cell(s) that contain a bounding box around the Vaalserberg³
     assert_eq!(
         HashSet::from(["NL", "LU", "DE", "BE", "BE-VLG", "BE-WAL"]),
-        boundaries.intersecting_ids(BoundingBox::new(50.6, 5.9, 50.8, 6.1)?)
+        COUNTRY_BOUNDARIES.intersecting_ids(BoundingBox::new(50.6, 5.9, 50.8, 6.1)?)
     );
-    
+
     // get which country ids completely cover a bounding box around the Vaalserberg³
     assert_eq!(
         HashSet::new(),
-        boundaries.containing_ids(BoundingBox::new(50.6, 5.9, 50.8, 6.1)?)
+        COUNTRY_BOUNDARIES.containing_ids(BoundingBox::new(50.6, 5.9, 50.8, 6.1)?)
     );
 
     Ok(())
