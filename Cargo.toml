@@ -9,3 +9,8 @@ repository = "https://github.com/westnordost/country-boundaries-rust/"
 categories = ["internationalization"]
 keywords = ["geocoding", "openstreetmap"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[workspace]
+members = [
+    "bench",
+]

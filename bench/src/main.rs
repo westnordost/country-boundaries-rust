@@ -5,7 +5,10 @@ use std::time::Instant;
 fn main() {
     let loading_time = Instant::now();
     let boundaries = boundaries();
-    println!("Loading data took {:.2} seconds", loading_time.elapsed().as_secs_f64());
+    println!(
+        "Loading data took {:.2} seconds",
+        loading_time.elapsed().as_secs_f64()
+    );
 
     let rng = fastrand::Rng::new();
     let checks = 100_000_000;
