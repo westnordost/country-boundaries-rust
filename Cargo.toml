@@ -17,9 +17,9 @@ default = []
 #
 #     The source data is licensed (c) OpenStreetMap contributors, OpenDatabase License 1.0
 #
-with_ODBL_licensed_OSM_data_low = ["lazy_static"]
+with_ODBL_licensed_OSM_data_small = ["lazy_static"]
 with_ODBL_licensed_OSM_data_mid = ["lazy_static"]
-with_ODBL_licensed_OSM_data_high = ["lazy_static"]
+with_ODBL_licensed_OSM_data_big = ["lazy_static"]
 
 [dependencies]
 lazy_static = { version = "1.4.0", optional = true }

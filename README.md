@@ -17,7 +17,7 @@ has pretty much the same API and uses the same file format.
 Add to your `Cargo.toml`.  When using ODBL features, you must adhere to the ODbL license.
 ```toml
 [dependencies]
-country-boundaries = { version = "1", features = ["with_ODBL_licensed_OSM_data_high"] }
+country-boundaries = { version = "1", features = ["with_ODBL_licensed_OSM_data_big"] }
 ```
 
 ```rust

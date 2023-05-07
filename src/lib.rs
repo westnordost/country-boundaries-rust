@@ -23,19 +23,19 @@ mod multipolygon;
 lazy_static::lazy_static! {
     /// The country boundaries data for the whole world under ODBl license.
     pub static ref COUNTRY_BOUNDARIES: CountryBoundaries = {
-        let data = if cfg!(feature = "with_ODBL_licensed_OSM_data_high") {
+        let data = if cfg!(feature = "with_ODBL_licensed_OSM_data_big") {
             include_bytes!("../data/boundaries360x180.ser").as_slice()
         } else if cfg!(feature = "with_ODBL_licensed_OSM_data_mid") {
             include_bytes!("../data/boundaries180x90.ser").as_slice()
-        } else if cfg!(feature = "with_ODBL_licensed_OSM_data_low") {
+        } else if cfg!(feature = "with_ODBL_licensed_OSM_data_small") {
             include_bytes!("../data/boundaries60x30.ser").as_slice()
         } else {
             unreachable!()
         };
         #[cfg(not(any(
-            feature = "with_ODBL_licensed_OSM_data_high",
+            feature = "with_ODBL_licensed_OSM_data_big",
             feature = "with_ODBL_licensed_OSM_data_mid",
-            feature = "with_ODBL_licensed_OSM_data_low"
+            feature = "with_ODBL_licensed_OSM_data_small"
         )))]
         compile_error!("Do not use `lazy_static` feature directly. See README");
 
