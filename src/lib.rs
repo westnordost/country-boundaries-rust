@@ -216,14 +216,14 @@ impl CountryBoundaries {
         let raster_width = self.raster_width as f64;
         let cell_x = cell_x as f64;
         let cell_longitude = -180.0 + 360.0 * cell_x / raster_width;
-        ((longitude - cell_longitude) * 360.0 * 0xffff as f64 / raster_width) as u16
+        ((longitude - cell_longitude) * raster_width * 0xffff as f64 / 360.0) as u16
     }
 
     fn latitude_to_local_y(&self, cell_y: usize, latitude: f64) -> u16 {
         let raster_height = (self.raster.len() / self.raster_width) as f64;
         let cell_y = cell_y as f64;
         let cell_latitude = 90.0 - 180.0 * (cell_y + 1.0) / raster_height;
-        ((latitude - cell_latitude) * 180.0 * 0xffff as f64 / raster_height) as u16
+        ((latitude - cell_latitude) * raster_height * 0xffff as f64 / 180.0) as u16
     }
 
     fn cells(&self, bounds: &BoundingBox) -> impl Iterator<Item = &Cell> {
