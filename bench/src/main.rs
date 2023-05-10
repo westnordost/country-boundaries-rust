@@ -1,4 +1,4 @@
-use country_boundaries::{self, CountryBoundaries, LatLon};
+use country_boundaries::{self, CountryBoundaries, LatLon, BOUNDARIES_ODBL_360X180};
 use std::fs;
 use std::time::Instant;
 
@@ -33,8 +33,7 @@ fn main() {
 }
 
 fn boundaries() -> CountryBoundaries {
-    let buf = fs::read("../data/boundaries360x180.ser");
-    return CountryBoundaries::from_reader(buf.unwrap().as_slice()).unwrap();
+    return CountryBoundaries::from_reader(BOUNDARIES_ODBL_360X180).unwrap();
 }
 
 fn latlon(latitude: f64, longitude: f64) -> LatLon {
