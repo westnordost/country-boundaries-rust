@@ -1,4 +1,4 @@
-use country_boundaries::{self, BoundingBox, CountryBoundaries, LatLon};
+use country_boundaries::{self, BoundingBox, CountryBoundaries, LatLon, BOUNDARIES_ODBL_180X90};
 use std::collections::HashSet;
 use std::fs;
 
@@ -29,8 +29,7 @@ fn containing_ids_at_180th_meridian() {
 }
 
 fn boundaries() -> CountryBoundaries {
-    let buf = fs::read("./data/boundaries360x180.ser");
-    return CountryBoundaries::from_reader(buf.unwrap().as_slice()).unwrap();
+    return CountryBoundaries::from_reader(BOUNDARIES_ODBL_180X90).unwrap();
 }
 
 fn latlon(latitude: f64, longitude: f64) -> LatLon {

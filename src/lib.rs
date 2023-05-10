@@ -18,6 +18,13 @@ mod error;
 mod latlon;
 mod multipolygon;
 
+/// Bytes of the ODbL licensed data in a 360x180 raster, (c) OpenStreetMap contributors.
+pub static BOUNDARIES_ODBL_360X180: &'static [u8] = include_bytes!("../data/boundaries360x180.ser");
+/// Bytes of the ODbL licensed data in a 180x90 raster, (c) OpenStreetMap contributors.
+pub static BOUNDARIES_ODBL_180X90: &'static [u8] = include_bytes!("../data/boundaries180x90.ser");
+/// Bytes of the ODbL licensed data in a 60x30 raster, (c) OpenStreetMap contributors.
+pub static BOUNDARIES_ODBL_60X30: &'static [u8] = include_bytes!("../data/boundaries60x30.ser");
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct CountryBoundaries {
     /// 2-dimensional array of cells
@@ -41,11 +48,10 @@ impl CountryBoundaries {
     ///
     /// # Example
     /// ```
-    /// # use country_boundaries::{CountryBoundaries, LatLon};
+    /// # use country_boundaries::{CountryBoundaries, LatLon, BOUNDARIES_ODBL_360X180};
     /// #
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// # let buf = std::fs::read("./data/boundaries360x180.ser")?;
-    /// # let boundaries = CountryBoundaries::from_reader(buf.as_slice())?;
+    /// # let boundaries = CountryBoundaries::from_reader(BOUNDARIES_ODBL_360X180)?;
     /// assert!(boundaries.is_in(LatLon::new(47.6973, 8.6910)?, "DE"));
     /// # Ok(())
     /// # }
@@ -59,12 +65,11 @@ impl CountryBoundaries {
     ///
     /// # Example
     /// ```
-    /// # use country_boundaries::{CountryBoundaries, LatLon};
+    /// # use country_boundaries::{CountryBoundaries, LatLon, BOUNDARIES_ODBL_360X180};
     /// # use std::collections::HashSet;
     /// #
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// # let buf = std::fs::read("./data/boundaries360x180.ser")?;
-    /// # let boundaries = CountryBoundaries::from_reader(buf.as_slice())?;
+    /// # let boundaries = CountryBoundaries::from_reader(BOUNDARIES_ODBL_360X180)?;
     /// // check if position is in any country where the first day of the workweek is Saturday. It is
     /// // more efficient than calling `is_in` for every id in a row.
     /// assert!(
@@ -86,12 +91,11 @@ impl CountryBoundaries {
     ///
     /// # Example
     /// ```
-    /// # use country_boundaries::{CountryBoundaries, LatLon};
+    /// # use country_boundaries::{CountryBoundaries, LatLon, BOUNDARIES_ODBL_360X180};
     /// # use std::collections::HashSet;
     /// #
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// # let buf = std::fs::read("./data/boundaries360x180.ser")?;
-    /// # let boundaries = CountryBoundaries::from_reader(buf.as_slice())?;
+    /// # let boundaries = CountryBoundaries::from_reader(BOUNDARIES_ODBL_360X180)?;
     /// assert_eq!(
     ///     vec!["US-TX", "US"],
     ///     boundaries.ids(LatLon::new(33.0, -97.0)?)
@@ -118,12 +122,11 @@ impl CountryBoundaries {
     ///
     /// # Example
     /// ```
-    /// # use country_boundaries::{CountryBoundaries, BoundingBox};
+    /// # use country_boundaries::{CountryBoundaries, BoundingBox, BOUNDARIES_ODBL_360X180};
     /// # use std::collections::HashSet;
     /// #
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// # let buf = std::fs::read("./data/boundaries360x180.ser")?;
-    /// # let boundaries = CountryBoundaries::from_reader(buf.as_slice())?;
+    /// # let boundaries = CountryBoundaries::from_reader(BOUNDARIES_ODBL_360X180)?;
     /// assert_eq!(
     ///     HashSet::from(["RU"]),
     ///     boundaries.containing_ids(BoundingBox::new(66.0, 178.0, 68.0, -178.0)?)
@@ -160,12 +163,11 @@ impl CountryBoundaries {
     ///
     /// # Example
     /// ```
-    /// # use country_boundaries::{CountryBoundaries, BoundingBox};
+    /// # use country_boundaries::{CountryBoundaries, BoundingBox, BOUNDARIES_ODBL_360X180};
     /// # use std::collections::HashSet;
     /// #
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// # let buf = std::fs::read("./data/boundaries360x180.ser")?;
-    /// # let boundaries = CountryBoundaries::from_reader(buf.as_slice())?;
+    /// # let boundaries = CountryBoundaries::from_reader(BOUNDARIES_ODBL_360X180)?;
     /// assert_eq!(
     ///     HashSet::from(["RU", "US-AK", "US"]),
     ///     boundaries.intersecting_ids(BoundingBox::new(50.0, 163.0, 67.0, -150.0)?)
