@@ -84,7 +84,9 @@ Natural Earth data is public domain.
 
 ## Default data
 For your convenience, the default data is included in the distribution as bytes which you can access via the constants
-`BOUNDARIES_ODBL_360X180`, `BOUNDARIES_ODBL_180X60` or `BOUNDARIES_ODBL_60X30`. It's all the same data, only different 
+`BOUNDARIES_ODBL_360X180`, `BOUNDARIES_ODBL_180X60` or `BOUNDARIES_ODBL_60X30`. (The linker ensures that only the
+constants you use are actually included in the executable). 
+It's all the same data, only different 
 raster sizes: The bigger the raster, the bigger the file size but also the faster the queries, see the next section 
 about speed for details. The precision is the same.
 
@@ -106,7 +108,7 @@ See the source file for details (you can open it in [JOSM](https://josm.openstre
 
 # Speed
 
-Querying 100 million random locations on a single thread takes about 10 seconds with a Ryzen 5700X CPU. 
+Querying 1 million random locations on a single thread takes about 0.1 seconds with a Ryzen 5700X CPU. 
 
 For above measurement, I used a raster of 360x180 (= one cell is 1° in longitude, 1° in latitude). You can choose a smaller 
 raster to have a smaller file or choose a bigger raster to have faster queries. According to my tests, a file with a 
