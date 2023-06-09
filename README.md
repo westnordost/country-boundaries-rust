@@ -99,10 +99,13 @@ editing:
   oblivious of sea borders and will only return correct results for points on land.
 
 - As ids, it uses ISO 3166-1 alpha-2 country codes where available and otherwise ISO 3166-2 for
-  subdivision codes. The dataset currently includes all subdivisions only for the
-   🇺🇸 United States, 🇨🇦 Canada, 🇦🇺 Australia, 🇨🇳 China, 🇮🇳 India, 🇫🇲 Micronesia and 🇧🇪 Belgium, plus
-  a few subdivisions of other countries (mostly autonomous regions), such as the republics and autonomous 
-  provinces of 🇷🇺 Russia.
+  subdivision codes
+  
+- It includes all subdivisions for 🇺🇸 United States, 🇨🇦 Canada, 🇦🇺 Australia, 🇨🇳 China, 🇮🇳 India, 🇪🇸 Spain, 🇬🇧 United Kingdom, 
+  🇧🇪 Belgium, 🇧🇦 Bosnia & Herzegovina, 🇫🇲 Micronesia, 🇰🇲 Comoros and 
+  [**autonomous** subdivisions of most other countries](https://en.wikipedia.org/wiki/List_of_autonomous_areas_by_country) 
+  that have a ISO 3166-2 code, such as the republics within 🇷🇺 Russia, the autonomous regions in 🇮🇹 Italy, in 🇮🇩 Indonesia etc.
+
 
 See the source file for details (you can open it in [JOSM](https://josm.openstreetmap.de/)).
 
