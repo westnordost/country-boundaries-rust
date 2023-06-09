@@ -102,9 +102,9 @@ editing:
   subdivision codes
   
 - It includes all subdivisions for 🇺🇸 United States, 🇨🇦 Canada, 🇦🇺 Australia, 🇨🇳 China, 🇮🇳 India, 🇪🇸 Spain, 🇬🇧 United Kingdom, 
-  🇧🇪 Belgium, 🇧🇦 Bosnia & Herzegovina, 🇫🇲 Micronesia, 🇰🇲 Comoros and 
+  🇧🇪 Belgium, 🇧🇦 Bosnia & Herzegovina, 🇮🇩 Indonesia, 🇫🇲 Micronesia, 🇰🇲 Comoros and 
   [**autonomous** subdivisions of most other countries](https://en.wikipedia.org/wiki/List_of_autonomous_areas_by_country) 
-  that have a ISO 3166-2 code, such as the republics within 🇷🇺 Russia, the autonomous regions in 🇮🇹 Italy, in 🇮🇩 Indonesia etc.
+  that have a ISO 3166-2 code, such as the republics within 🇷🇺 Russia, the autonomous regions in 🇮🇹 Italy etc.
 
 
 See the source file for details (you can open it in [JOSM](https://josm.openstreetmap.de/)).
