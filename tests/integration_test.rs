@@ -1,6 +1,6 @@
 use country_boundaries::{self, BoundingBox, CountryBoundaries, LatLon, BOUNDARIES_ODBL_180X90};
 use std::collections::HashSet;
-use std::fs;
+
 
 #[test]
 fn return_correct_results_at_cell_edges() {
@@ -13,9 +13,9 @@ fn return_correct_results_at_cell_edges() {
     assert_eq!(vec!["HR"], boundaries.ids(latlon(46.0, 17.0)));
     assert_eq!(vec!["HR"], boundaries.ids(latlon(45.5, 17.0)));
 
-    assert_eq!(vec!["BA"], boundaries.ids(latlon(45.0, 17.0)));
-    assert_eq!(vec!["BA"], boundaries.ids(latlon(45.0, 16.5)));
-    assert_eq!(vec!["BA"], boundaries.ids(latlon(45.0, 16.0)));
+    assert_eq!(vec!["BA-SRP", "BA"], boundaries.ids(latlon(45.0, 17.0)));
+    assert_eq!(vec!["BA-SRP", "BA"], boundaries.ids(latlon(45.0, 16.5)));
+    assert_eq!(vec!["BA-BIH", "BA"], boundaries.ids(latlon(45.0, 16.0)));
 }
 
 #[test]
