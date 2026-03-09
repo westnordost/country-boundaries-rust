@@ -11,6 +11,7 @@ type Result<T> = std::result::Result<T, ReadError>;
 #[derive(Debug)]
 pub enum ReadError {
     WrongVersionNumber { expected: u16, actual: u16 },
+    InvalidData,
     UnableToParseUsize(std::num::TryFromIntError),
     UnableToDecodeUtf8(std::string::FromUtf8Error),
     Io(std::io::Error),
@@ -28,6 +29,9 @@ impl fmt::Display for ReadError {
                        (expected: '{expected}'). \
                        You may need to get the current version of the data."
                 )
+            }
+            ReadError::InvalidData => {
+                write!(f, "Invalid data")
             }
             ReadError::UnableToParseUsize(e) => {
                 write!(f, "Unable to parse usize from '{}'", e)
@@ -161,14 +165,18 @@ fn read_u16(reader: &mut impl Read) -> Result<u16> {
     Ok(u16::from_be_bytes(buf))
 }
 
-fn read_u32(reader: &mut impl Read) -> Result<u32> {
+fn read_i32(reader: &mut impl Read) -> Result<i32> {
     let mut buf = [0; 4];
     reader.read_exact(&mut buf)?;
-    Ok(u32::from_be_bytes(buf))
+    Ok(i32::from_be_bytes(buf))
 }
 
 fn read_usize32(reader: &mut impl Read) -> Result<usize> {
-    Ok(usize::try_from(read_u32(reader)?)?)
+    let value = read_i32(reader)?;
+    if value < 0 {
+        return Err(ReadError::InvalidData);
+    }
+    Ok(usize::try_from(value)?)
 }
 
 fn read_f64(reader: &mut impl Read) -> Result<f64> {
@@ -236,20 +244,24 @@ mod tests {
     }
 
     #[test]
-    fn test_read_u32() {
-        assert!(read_u32(&mut [0x00, 0x00, 0x00].as_slice()).is_err());
+    fn test_read_i32() {
+        assert!(read_i32(&mut [0x00, 0x00, 0x00].as_slice()).is_err());
 
         assert_eq!(
             17,
-            read_u32(&mut [0x00, 0x00, 0x00, 0x11].as_slice()).unwrap()
+            read_i32(&mut [0x00, 0x00, 0x00, 0x11].as_slice()).unwrap()
         );
         assert_eq!(
-            u32::MIN,
-            read_u32(&mut [0x00, 0x00, 0x00, 0x00].as_slice()).unwrap()
+            0,
+            read_i32(&mut [0x00, 0x00, 0x00, 0x00].as_slice()).unwrap()
         );
         assert_eq!(
-            u32::MAX,
-            read_u32(&mut [0xff, 0xff, 0xff, 0xff].as_slice()).unwrap()
+            i32::MAX,
+            read_i32(&mut [0x7f, 0xff, 0xff, 0xff].as_slice()).unwrap()
+        );
+        assert_eq!(
+            -1,
+            read_i32(&mut [0xff, 0xff, 0xff, 0xff].as_slice()).unwrap()
         );
     }
 
@@ -269,6 +281,12 @@ mod tests {
             0xffff,
             read_usize32(&mut [0x00, 0x00, 0xff, 0xff].as_slice()).unwrap()
         );
+    }
+
+    #[test]
+    fn read_usize32_rejects_negative_values() {
+        assert!(read_usize32(&mut [0x80, 0x00, 0x00, 0x00].as_slice()).is_err());
+        assert!(read_usize32(&mut [0xff, 0xff, 0xff, 0xff].as_slice()).is_err());
     }
 
     #[test]
@@ -364,6 +382,41 @@ mod tests {
             },
             read_cell(&mut cell.as_slice()).unwrap()
         );
+    }
+
+    #[test]
+    fn test_read_negative_geometry_sizes_count() {
+        let data = [
+            0x00, 0x02, // version number
+            0xff, 0xff, 0xff, 0xff, // geometry sizes map length = -1
+        ];
+        assert!(from_reader(&mut data.as_slice()).is_err());
+    }
+
+    #[test]
+    fn test_read_negative_raster_width() {
+        let data = [
+            0x00, 0x02, // version number
+            0x00, 0x00, 0x00, 0x00, // geometry sizes map length
+            0x80, 0x00, 0x00, 0x00, // raster width = -2147483648
+        ];
+        assert!(from_reader(&mut data.as_slice()).is_err());
+    }
+
+    #[test]
+    fn test_read_negative_raster_size() {
+        let data = [
+            0x00, 0x02, // version number
+            0x00, 0x00, 0x00, 0x00, // geometry sizes map length
+            0x00, 0x00, 0x00, 0x01, // raster width
+            0xff, 0xff, 0xff, 0xff, // raster size = -1
+        ];
+        assert!(from_reader(&mut data.as_slice()).is_err());
+    }
+
+    #[test]
+    fn test_read_negative_ring_size() {
+        assert!(read_ring(&mut [0xff, 0xff, 0xff, 0xff].as_slice()).is_err());
     }
 
     #[test]
