@@ -77,14 +77,40 @@ The default data is generated from
 it is licensed under the [Open Database License](https://opendatacommons.org/licenses/odbl/) (ODbL),
 © OpenStreetMap contributors. If you use it, attribution is required.
 
-You can also instead generate an own (country) boundaries file from a GeoJson or an
-[OSM XML](https://wiki.openstreetmap.org/wiki/OSM_XML), using the Java shell application in the
-`/generator/` folder of the [Java project](https://github.com/westnordost/countryboundaries) and use that. For example, 
+You can also generate your own boundaries file from a GeoJSON or an
+[OSM XML](https://wiki.openstreetmap.org/wiki/OSM_XML) using the included `generator/` tool (see below),
+or using the Java shell application in the
+[Java project](https://github.com/westnordost/countryboundaries). For example,
 Natural Earth data is public domain.
+
+## Generator
+
+The `generator/` directory contains a CLI tool that creates boundaries data files from GeoJSON or
+JOSM boundaries OSM XML files.
+
+```sh
+# Build the generator
+cargo build --release -p country-boundaries-generator
+
+# Generate from the JOSM boundaries file
+./target/release/country-boundaries-generator boundaries.osm 360 180
+
+# Generate from a GeoJSON file
+./target/release/country-boundaries-generator boundaries.geojson 360 180
+```
+
+This produces a `boundaries.ser` file that can be loaded with `CountryBoundaries::from_reader`.
+
+The GeoJSON input must be a FeatureCollection where each Feature has a Polygon or MultiPolygon
+geometry and a properties object with an `"id"` field containing the area identifier (e.g. `"US"`,
+`"DE"`, `"US-TX"`).
+
+The two numeric arguments are the raster width and height. Larger values produce bigger files but
+faster queries. Common choices are `360 180`, `180 90`, or `60 30`.
 
 ## Default data
 For your convenience, the default data is included in the distribution as bytes which you can access via the constants
-`BOUNDARIES_ODBL_360X180`, `BOUNDARIES_ODBL_180X60` or `BOUNDARIES_ODBL_60X30`. (The linker ensures that only the
+`BOUNDARIES_ODBL_360X180`, `BOUNDARIES_ODBL_180X90` or `BOUNDARIES_ODBL_60X30`. (The linker ensures that only the
 constants you use are actually included in the executable). 
 It's all the same data, only different 
 raster sizes: The bigger the raster, the bigger the file size but also the faster the queries, see the next section 
