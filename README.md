@@ -78,10 +78,7 @@ it is licensed under the [Open Database License](https://opendatacommons.org/lic
 © OpenStreetMap contributors. If you use it, attribution is required.
 
 You can also generate your own boundaries file from a GeoJSON or an
-[OSM XML](https://wiki.openstreetmap.org/wiki/OSM_XML) using the included `generator/` tool (see below),
-or using the Java shell application in the
-[Java project](https://github.com/westnordost/countryboundaries). For example,
-Natural Earth data is public domain.
+[OSM XML](https://wiki.openstreetmap.org/wiki/OSM_XML) using the included `generator/` tool (see below). For example, Natural Earth data is public domain.
 
 ## Generator
 
