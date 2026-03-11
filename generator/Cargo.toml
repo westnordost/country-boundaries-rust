@@ -1,0 +1,14 @@
+[package]
+name = "country-boundaries-generator"
+version = "0.1.0"
+edition = "2021"
+description = "Generate country-boundaries data files from GeoJSON or OSM XML"
+
+[dependencies]
+geo = "0.29"
+geojson = "0.24"
+quick-xml = "0.37"
+
+[dev-dependencies]
+country-boundaries = { path = ".." }
+tempfile = "3"

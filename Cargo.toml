@@ -13,4 +13,5 @@ keywords = ["geocoding", "openstreetmap"]
 [workspace]
 members = [
     "bench",
+    "generator",
 ]
